@@ -1,0 +1,10 @@
+INSERT INTO join_request (user_id, organization_id, status) VALUES (80, 3, 'pending');
+INSERT INTO join_request (user_id, organization_id, status) VALUES (100, 3, 'pending');
+INSERT INTO join_request (user_id, organization_id, status) VALUES (57, 3, 'pending');
+INSERT INTO join_request (user_id, organization_id, status) VALUES (68, 3, 'pending');
+INSERT INTO join_request (user_id, organization_id, status) VALUES (41, 3, 'pending');
+INSERT INTO join_request (user_id, organization_id, status) VALUES (40, 3, 'pending');
+INSERT INTO join_request (user_id, organization_id, status) VALUES (94, 3, 'pending');
+INSERT INTO join_request (user_id, organization_id, status) VALUES (59, 3, 'pending');
+INSERT INTO join_request (user_id, organization_id, status) VALUES (35, 3, 'pending');
+INSERT INTO join_request (user_id, organization_id, status) VALUES (35, 3, 'pending');

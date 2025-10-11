@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý yêu cầu | CodeJourney {% endblock %}
+
+{% block link %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #1e1e2f;
+        }
+        .table-row:hover {
+            background-color: #2d2d42;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .action-btn {
+            transition: all 0.3s ease;
+        }
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+        .back-btn:hover {
+            background-color: #4a5568;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class=" mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-white">Quản lý yêu cầu tham gia</h1>
+            <a href="{{ url_for('organization_detail', organization_id=organization.id) }}" class="flex items-center space-x-3">
+                <div class="w-3 h-8 rounded-full bg-purple-500"></div>
+                <div class="w-3 h-8 rounded-full bg-blue-500 opacity-70"></div>
+                <div class="w-3 h-8 rounded-full bg-indigo-500 opacity-50"></div>
+            </a>
+        </div>
+
+        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-700 text-gray-300">
+                        <tr>
+                            <th class="px-6 py-4 text-left font-medium">Người dùng</th>
+                            <th class="px-6 py-4 text-left font-medium">Email</th>
+                            <th class="px-6 py-4 text-left font-medium">Trạng thái</th>
+                            <th class="px-6 py-4 text-right font-medium">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        {% for req in requests %}
+                        <tr class="table-row transition-all duration-200">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <img class="h-10 w-10 rounded-full" src="{{ req.user.avatar }}" alt="">
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-white">{{ req.user.username }}</div>
+                                        <div class="text-sm text-gray-400">@{{ req.user.username }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ req.user.email }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-500 text-white">
+                                    Đang chờ
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex justify-end space-x-2">
+                                    <form method="POST" class="flex justify-end space-x-2">
+                                        <input type="hidden" name="request_id" value="{{ req.id }}">
+                                        <button type="submit" name="action" value="approve" class="action-btn px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center">
+                                            <i class="fas fa-check mr-1"></i> Duyệt
+                                        </button>
+                                        <button type="submit" name="action" value="reject" class="action-btn px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-md flex items-center">
+                                            <i class="fas fa-times mr-1"></i> Từ chối
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="empty-state" class="mt-12 text-center {% if requests %}hidden{% endif %}">
+            <div class="mx-auto w-24 h-24 text-gray-500">
+                <i class="fas fa-users-slash text-6xl"></i>
+            </div>
+            <h3 class="mt-4 text-lg font-medium text-gray-300">Không có yêu cầu tham gia nào</h3>
+            <p class="mt-1 text-sm text-gray-400">Tất cả yêu cầu tham gia đã được xử lý.</p>
+        </div>
+    </div>
+
+    
+{% endblock %}

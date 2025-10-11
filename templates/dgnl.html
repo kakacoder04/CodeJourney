@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Đánh Giá Năng Lực | CodeJourney{% endblock %}
+{% block link %}
+<style>
+    body {
+        background-color: #1e1e2f;
+    }
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+    .progress-bar {
+        height: 10px;
+        border-radius: 5px;
+        background-color: #2d2d42;
+    }
+    .progress-fill {
+        height: 100%;
+        border-radius: 5px;
+        transition: width 0.5s ease-in-out;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-16 px-4">
+    <div class="container mx-auto text-center">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6">Luyện Đề Đánh Giá Năng Lực</h2>
+        <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">Chuẩn bị tốt nhất cho kỳ thi đánh giá năng lực của Đại học Quốc gia Hà Nội và TP.HCM</p>
+        <div class="flex flex-wrap justify-center gap-4">
+            <button class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-full font-semibold transition">
+                <i class="fas fa-book-open mr-2"></i> Ôn tập ngay
+            </button>
+            <button class="bg-transparent border-2 border-purple-400 hover:bg-purple-900 text-white px-8 py-3 rounded-full font-semibold transition">
+                <i class="fas fa-info-circle mr-2"></i> Tìm hiểu thêm
+            </button>
+        </div>
+    </div>
+</section>
+<!-- Main Content -->
+<div class=" mx-auto px-4 py-8 max-w-6xl">
+    <!-- University Selection -->
+    <div class="flex justify-center mb-12">
+        <div class="bg-[#29293d] rounded-full p-1 flex">
+            <button id="hcm-btn" class="px-6 py-2 rounded-full bg-purple-600 font-medium">ĐHQG TP.HCM</button>
+            <button id="hn-btn" class="px-6 py-2 rounded-full bg-transparent font-medium">ĐHQG Hà Nội</button>
+        </div>
+    </div>
+    <!-- HCM Content -->
+    <div id="hcm-content" class="grid md:grid-cols-1 gap-8">
+        <!-- Assessment Card -->
+        <div class="bg-[#29293d] rounded-xl p-6 shadow-lg card-hover transition duration-300">
+            <div class="flex items-center mb-4">
+                <div class="bg-purple-600 p-3 rounded-full mr-4">
+                    <i class="fas fa-brain text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold">Bài đánh giá tổng hợp</h3>
+            </div>
+            <p class="text-gray-400 mb-4">Kiểm tra toàn diện các môn học với cấu trúc đề thi chuẩn ĐHQG TP.HCM</p>
+            <button class="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-medium transition">
+                Bắt đầu ngay
+            </button>
+        </div>
+    </div>
+    <!-- HN Content (Hidden by default) -->
+    <div id="hn-content" class="grid md:grid-cols-1 gap-8 hidden">
+        <!-- Assessment Card -->
+        <div class="bg-[#29293d] rounded-xl p-6 shadow-lg card-hover transition duration-300">
+            <div class="flex items-center mb-4">
+                <div class="bg-red-500 p-3 rounded-full mr-4">
+                    <i class="fas fa-brain text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold">Bài đánh giá tổng hợp</h3>
+            </div>
+            <p class="text-gray-400 mb-4">Kiểm tra toàn diện các môn học với cấu trúc đề thi chuẩn ĐHQG Hà Nội</p>
+            <button class="w-full bg-red-500 hover:bg-red-600 py-2 rounded-lg font-medium transition">
+                Bắt đầu ngay
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+    // Toggle between HCM and HN content
+    document.getElementById('hcm-btn').addEventListener('click', function() {
+        document.getElementById('hcm-content').classList.remove('hidden');
+        document.getElementById('hn-content').classList.add('hidden');
+        document.getElementById('hcm-btn').classList.add('bg-purple-600');
+        document.getElementById('hcm-btn').classList.remove('bg-transparent');
+        document.getElementById('hn-btn').classList.remove('bg-purple-600');
+        document.getElementById('hn-btn').classList.add('bg-transparent');
+    });
+    document.getElementById('hn-btn').addEventListener('click', function() {
+        document.getElementById('hcm-content').classList.add('hidden');
+        document.getElementById('hn-content').classList.remove('hidden');
+        document.getElementById('hcm-btn').classList.remove('bg-purple-600');
+        document.getElementById('hcm-btn').classList.add('bg-transparent');
+        document.getElementById('hn-btn').classList.add('bg-purple-600');
+        document.getElementById('hn-btn').classList.remove('bg-transparent');
+    });
+    // Animate progress bars on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressBars = document.querySelectorAll('.progress-fill');
+        progressBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 100);
+        });
+    });
+</script>
+{% endblock %}

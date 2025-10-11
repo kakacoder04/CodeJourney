@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block title %}Tạo Tổ Chức | CodeJourney{% endblock %}
+
+{% block link %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1e1e2f;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .input-focus:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        }
+        
+        .btn-gradient:hover {
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-6xl bg-[#27293d] rounded-xl shadow-2xl overflow-hidden">
+            <!-- Header with gradient border bottom -->
+            <div class="border-b border-b-gradient px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold gradient-text">
+                        <i class="fas fa-plus-circle mr-2"></i>
+                        Tạo Tổ Chức Mới
+                    </h1>
+                    <a href="{{ url_for('organization') }}" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </a>
+                </div>
+                <p class="text-gray-400 mt-1 text-sm text-left">Tạo một tổ chức mới để quản lý các dự án và thành viên</p>
+            </div>
+
+            <!-- Form content -->
+            <form method="POST" action="{{ url_for('create_organization') }}" class="p-6 space-y-6" enctype="multipart/form-data">
+                
+                <!-- Organization Name -->
+                <div class="space-y-2">
+                    <label for="name" class="block text-sm font-medium text-gray-300">
+                        <i class="fas fa-building mr-2"></i>
+                        Tên Tổ Chức
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            value="{{ request.form.get('name', '') }}"
+                            required
+                            minlength="4"
+                            placeholder="Nhập tên tổ chức"
+                            class="input-focus w-full px-4 py-3 bg-[#2a2b3d] border border-[#3a3b4d] rounded-lg text-white placeholder-gray-500 focus:outline-none transition-all"
+                        >
+                            <div class="absolute inset-y-0 right-0 flex items-center justify-center pr-3 pointer-events-none">
+                            <i class="fas fa-check-circle text-green-600 opacity-0" id="name-check"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500">Tên tổ chức phải có ít nhất 1 ký tự</p>
+                    {% if error and 'name' in error %}
+                        <p class="text-xs text-red-400">{{ error['name'] }}</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Description -->
+                <div class="space-y-2">
+                    <label for="description" class="block text-sm font-medium text-gray-300">
+                        <i class="fas fa-align-left mr-2"></i>
+                        Mô tả
+                    </label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        rows="4"
+                        placeholder="Nhập mô tả tổ chức"
+                        class="input-focus w-full px-4 py-3 bg-[#2a2b3d] border border-[#3a3b4d3d] rounded-lg text-white placeholder-gray-500 focus:outline-none transition-all"
+                    >{{ request.form.get('description', '') }}</textarea>
+                    <p class="text-xs text-gray-500">Mô tả giúp mọi người hiểu về mục đích của tổ chức</p>
+                    {% if error and 'description' in error %}
+                        <p class="text-xs text-red-400">{{ error['description'] }}</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Organization Type -->
+                <div class="space-y-2">
+                    <label for="type" class="block text-sm font-medium text-gray-300">
+                        <i class="fas fa-lock mr-2"></i>
+                        Loại Tổ Chức
+                    </label>
+                    <div class="relative">
+                        <select 
+                            id="type" 
+                            name="type" 
+                            required
+                            class="input-focus w-full px-4 py-3 bg-[#2a2b3d] border border-[#3a3b4d] rounded-lg text-white focus:outline-none appearance-none transition-all"
+                        >
+                            <option value="public" {% if request.form.get('type') == 'public' %}selected{% endif %}>Công khai - Mọi người có thể tham gia</option>
+                            <option value="private" {% if request.form.get('type') == 'private' %}selected{% endif %}>Riêng tư - Chỉ thành viên được mời</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                    {% if error and 'type' in error %}
+                        <p class="text-xs text-red-400">{{ error['type'] }}</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Avatar Upload -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-300">
+                        <i class="fas fa-image mr-2"></i>
+                        Ảnh Đại Diện
+                    </label>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 rounded-full bg-[#2a2b3d] border-2 border-dashed border-[#3a3b4d] flex items-center justify-center overflow-hidden">
+                            <img id="avatar-preview" src="" alt="Avatar Preview" class="w-full h-full object-cover hidden">
+                            <i id="avatar-icon" class="fas fa-camera text-gray-500"></i>
+                        </div>
+                        <div>
+                            <label for="avatar" class="px-4 py-2 bg-[#3a3b4d] text-white rounded-lg hover:bg-[#4a4b5d] transition-colors cursor-pointer inline-flex items-center">
+                                <i class="fas fa-upload mr-2"></i>
+                                Tải ảnh lên
+                            </label>
+                            <input type="file" id="avatar" name="avatar" accept=".jpg,.jpeg,.png,.gif" class="hidden">
+                            <p class="text-xs text-gray-500 mt-1">JPG, PNG hoặc GIF.</p>
+                            <p id="avatar-error" class="text-xs text-red-400 hidden"></p>
+                        </div>
+                    </div>
+                    {% if error and 'avatar' in error %}
+                        <p class="text-xs text-red-400">{{ error['avatar'] }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
+                    <button type="submit" class="btn-gradient px-6 py-3 text-white font-medium rounded-lg hover:shadow-lg transition-all flex-1">
+                        <i class="fas fa-plus-circle mr-2"></i>
+                        Tạo Tổ Chức
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Simple validation for name field
+        const nameInput = document.getElementById('name');
+        const nameCheck = document.getElementById('name-check');
+        
+        nameInput.addEventListener('input', function() {
+            if (nameInput.value.length >= 4) {
+                nameCheck.classList.remove('opacity-0');
+                nameCheck.classList.add('opacity-100');
+            } else {
+                nameCheck.classList.remove('opacity-100');
+                nameCheck.classList.add('opacity-0');
+            }
+        });
+        
+        // Image preview and validation
+        const avatarInput = document.getElementById('avatar');
+        const avatarPreview = document.getElementById('avatar-preview');
+        const avatarIcon = document.getElementById('avatar-icon');
+        const avatarError = document.getElementById('avatar-error');
+
+        avatarInput.addEventListener('change', function() {
+            const file = this.files[0];
+            avatarError.classList.add('hidden');
+            if (file) {
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    avatarError.innerText = `Vui lòng chọn file JPG, PNG hoặc GIF.`;
+                    avatarError.classList.remove('hidden');
+                    this.value = ''; // Clear input
+                    return;
+                }
+                // Validate file size (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    avatarError.innerText = 'File không được vượt quá 5MB.';
+                    avatarError.classList.remove('hidden');
+                    this.value = ''; // Clear input
+                    return;
+                }
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.src = e.target.result;
+                    avatarPreview.classList.remove('hidden');
+                    avatarIcon.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Add animation to form elements when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const formElements = document.querySelectorAll('input, textarea, select, select, button');
+            formElements.forEach((element, index) => {
+                setTimeout(() => {
+                    el.classList.add('animate__animated', 'animate__fadeInUp');
+                    el.style.setProperty('--animate-duration', `${0.5}s`);
+                    el.style.setProperty('--animate-delay', `${index * 0.1}s`);
+                }, 0);
+            });
+        });
+    </script>
+{% endblock %}

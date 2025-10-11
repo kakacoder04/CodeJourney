@@ -1,0 +1,675 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} {% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" sizes="128x128" href="/static/icons/cup.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% block link %}{% endblock %}
+    <style>
+        body {
+            background-color: #1e1e2f;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, #1e1e2f 0%, #1a1a2e 100%);
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .menu-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: #6366f1;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .menu-item:hover::before {
+            transform: translateX(0);
+        }
+        
+        .menu-item.active {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .menu-item.active::before {
+            transform: translateX(0);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .chatbot-btn {
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .chatbot-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.7);
+        }
+        
+        .chatbot-window {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .message-bubble {
+            position: relative;
+            border-radius: 18px;
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border-bottom-right-radius: 4px !important;
+        }
+        
+        .bot-message {
+            background: #2d3748;
+            color: white;
+            border-bottom-left-radius: 4px !important;
+        }
+        
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #9ca3af;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: bounce 1.5s infinite ease-in-out;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #2a2a3a;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6366f1;
+        }
+        
+        /* Mobile menu styles */
+        .mobile-menu-button {
+            display: none;
+            z-index: 50;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 40;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Animation for messages */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message-animation {
+            animation: fadeInUp 0.3s ease-out forwards;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 280px;
+                height: 100vh;
+                transform: translateX(100%);
+                z-index: 45;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .mobile-menu-button {
+                display: flex;
+                position: fixed;
+                right: 1.5rem;
+                top: 1.5rem;
+                width: 3rem;
+                height: 3rem;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                border-radius: 50%;
+                color: white;
+                box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            }
+            
+            main {
+                margin-left: 0 !important;
+                width: 100%;
+                padding: 1.5rem;
+            }
+            
+            /* Chatbot adjustments for mobile */
+            #chatbot-btn {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                width: 3.5rem;
+                height: 3.5rem;
+            }
+            
+            #chatbot-window {
+                bottom: 6rem;
+                right: 1rem;
+                width: calc(100% - 2rem);
+                max-width: none;
+                height: 70vh;
+                max-height: 30rem;
+            }
+            
+            .message-bubble {
+                max-width: 90% !important;
+            }
+        }
+        
+        @media (min-width: 1025px) {
+            .sidebar {
+                transform: translateX(0) !important;
+            }
+            
+            main {
+                margin-left: 16rem !important;
+                width: calc(100% - 16rem);
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-button pulse">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+    
+    <!-- Overlay for mobile menu -->
+    <div class="overlay"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar h-screen flex flex-col fixed w-64">
+        <!-- Logo (fixed) -->
+        <div class="p-6">
+            <a href="{{ url_for('tongquan') }}" class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mr-3">
+                    <i class="fas fa-code text-white"></i>
+                </div>
+                <span class="text-2xl font-bold gradient-text">CodeJourney</span>
+            </a>
+        </div>
+        
+        <!-- Scrollable Menu -->
+        <div class="flex-grow overflow-y-auto px-4">
+            <ul class="menu space-y-1">
+                <li class="menu-item rounded-lg {% if current_page == 'tongquan' %}active{% endif %}">
+                    <a href="{{ url_for('tongquan') }}" class="flex items-center p-3 menu-link">
+                        <div class="w-8 h-8 rounded-full bg-indigo-600 bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-home text-cyan-400"></i>
+                        </div>
+                        <span>TỔNG QUAN</span>
+                    </a>
+                </li>
+                <li class="menu-item rounded-lg {% if current_page == 'learn' %}active{% endif %}">
+                    <a href="{{ url_for('learn') }}" class="flex items-center p-3 menu-link">
+                        <div class="w-8 h-8 rounded-full bg-indigo-600 bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-newspaper text-indigo-400"></i>
+                        </div>
+                        <span>BÀI HỌC</span>
+                    </a>
+                </li>
+                <li class="menu-item rounded-lg {% if current_page == 'challenge' %}active{% endif %}">
+                    <a href="{{ url_for('challenge') }}" class="flex items-center p-3 menu-link">
+                        <div class="w-8 h-8 rounded-full bg-purple-600 bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-trophy text-purple-400"></i>
+                        </div>
+                        <span>THỬ THÁCH</span>
+                    </a>
+                </li>
+                <li class="menu-item rounded-lg {% if current_page == 'exam' %}active{% endif %}">
+                    <a href="{{ url_for('exam') }}" class="flex items-center p-3 menu-link">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-book text-blue-400"></i>
+                        </div>
+                        <span>KHO ĐỀ</span>
+                    </a>
+                </li>
+                <li class="menu-item rounded-lg {% if current_page == 'organization' %}active{% endif %}">
+                    <a href="{{ url_for('organization') }}" class="flex items-center p-3 menu-link">
+                        <div class="w-8 h-8 rounded-full bg-green-600 bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-users text-green-400"></i>
+                        </div>
+                        <span>TỔ CHỨC</span>
+                    </a>
+                </li>
+                <li class="menu-item rounded-lg {% if current_page == 'rank' %}active{% endif %}">
+                    <a href="{{ url_for('rank') }}" class="flex items-center p-3 menu-link">
+                        <div class="w-8 h-8 rounded-full bg-yellow-600 bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-chart-line text-yellow-400"></i>
+                        </div>
+                        <span>BẢNG XẾP HẠNG</span>
+                    </a>
+                </li>
+                <li class="menu-item rounded-lg {% if current_page == 'daily_tasks' %}active{% endif %}">
+                    <a href="{{ url_for('daily_tasks') }}" class="flex items-center p-3 menu-link">
+                        <div class="w-8 h-8 rounded-full bg-red-600 bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-tasks text-red-400"></i>
+                        </div>
+                        <span>NHIỆM VỤ</span>
+                    </a>
+                </li>
+                <li class="menu-item rounded-lg {% if current_page == 'store' %}active{% endif %}">
+                    <a href="{{ url_for('store') }}" class="flex items-center p-3 menu-link">
+                        <div class="w-8 h-8 rounded-full bg-pink-600 bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-store text-pink-400"></i>
+                        </div>
+                        <span>CỬA HÀNG</span>
+                    </a>
+                </li>
+                <li class="menu-item rounded-lg {% if current_page == 'profile' %}active{% endif %}">
+                    <a href="{{ url_for('profile') }}" class="flex items-center p-3 menu-link">
+                        <div class="w-8 h-8 rounded-full bg-teal-600 bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-teal-400"></i>
+                        </div>
+                        <span>HỒ SƠ</span>
+                    </a>
+                </li>
+                <li class="menu-item rounded-lg {% if current_page == 'thongke' %}active{% endif %}">
+                    <a href="{{ url_for('thongke') }}" class="flex items-center p-3 menu-link">
+                        <div class="w-8 h-8 rounded-full bg-orange-600 bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-chart-pie text-orange-400"></i>
+                        </div>
+                        <span>THỐNG KÊ</span>
+                    </a>
+                </li>
+                <li class="menu-item rounded-lg {% if current_page == 'dgnl' %}active{% endif %}">
+                    <a href="{{ url_for('dgnl') }}" class="flex items-center p-3 menu-link">
+                        <div class="w-8 h-8 rounded-full bg-indigo-600 bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-star text-indigo-400"></i>
+                        </div>
+                        <span>ĐÁNH GIÁ NĂNG LỰC</span>
+                    </a>
+                </li>
+                {% if session.get('admin') %}
+                <!-- Admin link -->
+                <li class="menu-item rounded-lg {% if current_page == 'admin' %}active{% endif %}">
+                    <a href="{{ url_for('admin') }}" class="flex items-center p-3 menu-link">
+                        <div class="w-8 h-8 rounded-full bg-gray-600 bg-opacity-20 flex items-center justify-center mr-3">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <span>TRANG ADMIN</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        
+        <!-- Footer -->
+        <div class="p-4 border-t border-gray-800">
+            <div class="flex items-center justify-between">
+                <div class="text-xs text-gray-500">
+                    <p>CodeJourney - Đồng hành cùng bạn</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="min-h-screen p-6 transition-all duration-300">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% if current_page != 'profile'%}
+    <!-- Chatbot Button -->
+    <div id="chatbot-btn" onclick="toggleChatbot()"
+         class="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center cursor-pointer chatbot-btn z-30">
+        <i class="fas fa-robot text-2xl"></i>
+    </div>
+
+    <!-- Chatbot Window -->
+    <div id="chatbot-window" class="fixed bottom-24 right-8 w-96 h-[500px] bg-gray-800 rounded-xl shadow-2xl flex flex-col overflow-hidden border border-gray-700 transform translate-y-4 opacity-0 invisible z-30 transition-all duration-300">
+        <!-- Chatbot Header -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center mr-3">
+                    <i class="fas fa-robot text-white"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold">Trợ lý ảo CodeJourney</h3>
+                    <p class="text-xs opacity-80">Đang trực tuyến</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleChatbot()" class="text-white opacity-70 hover:opacity-100">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Chatbot Content -->
+        <div id="chatbot-content" class="flex-1 p-4 overflow-y-auto bg-gray-800">
+            <!-- Welcome message -->
+            <div class="mb-4">
+                <div class="flex items-start">
+                    <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center mr-3">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="message-bubble bot-message p-4 max-w-[80%]">
+                        <p class="text-white">Xin chào! Tôi là trợ lý ảo CodeJourney. Tôi có thể giúp gì cho bạn hôm nay?</p>
+                        <p class="text-xs text-gray-300 mt-2">Gợi ý: Bạn có thể hỏi về bài học, thử thách hoặc bất kỳ vấn đề lập trình nào.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Typing indicator (hidden by default) -->
+        <div id="typing-indicator" class="hidden px-4 py-2 bg-gray-800">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center mr-3">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chatbot Input -->
+        <div class="border-t border-gray-700 p-4 bg-gray-800">
+            <div class="flex items-center">
+                <input id="chatbot-input" type="text" placeholder="Nhập câu hỏi của bạn..."
+                    class="flex-1 bg-gray-700 text-white border border-gray-600 rounded-l-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400">
+                <button onclick="sendMessage()" class="bg-gradient-to-b from-indigo-600 to-purple-600 text-white px-4 py-3 rounded-r-lg hover:opacity-90 transition">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">Nhấn Enter để gửi tin nhắn</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleChatbot() {
+            const chatbotWindow = document.getElementById('chatbot-window');
+            const chatbotBtn = document.getElementById('chatbot-btn');
+            
+            if (chatbotWindow.classList.contains('invisible')) {
+                // Show chatbot
+                chatbotWindow.classList.remove('invisible', 'opacity-0', 'translate-y-4');
+                chatbotWindow.classList.add('opacity-100', 'translate-y-0');
+                
+                // Focus on input field
+                setTimeout(() => {
+                    document.getElementById('chatbot-input').focus();
+                }, 300);
+                
+                // On mobile, push content up when chatbot opens
+                if (window.innerWidth <= 1024) {
+                    document.body.style.overflow = 'hidden';
+                }
+            } else {
+                // Hide chatbot
+                chatbotWindow.classList.remove('opacity-100', 'translate-y-0');
+                chatbotWindow.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => {
+                    chatbotWindow.classList.add('invisible');
+                }, 300);
+                
+                // On mobile, restore scrolling when chatbot closes
+                if (window.innerWidth <= 1024) {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+
+        function addMessage(text, sender) {
+            const chatContent = document.getElementById('chatbot-content');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message-animation', 'mb-4');
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start justify-end">
+                        <div class="message-bubble user-message p-4">
+                            <p>${text}</p>
+                            <p class="text-xs text-indigo-200 mt-1">${getCurrentTime()}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center mr-3">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="message-bubble bot-message p-4">
+                            <p class="text-white">${text}</p>
+                            <p class="text-xs text-gray-300 mt-1">${getCurrentTime()}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chatContent.appendChild(messageDiv);
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            return `${hours}:${minutes} ${ampm}`;
+        }
+
+        async function sendMessage() {
+            const inputField = document.getElementById('chatbot-input');
+            const message = inputField.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage(message, 'user');
+            inputField.value = '';
+            
+            // Show typing indicator
+            const typingIndicator = document.getElementById('typing-indicator');
+            typingIndicator.classList.remove('hidden');
+            
+            // Scroll to bottom
+            const chatContent = document.getElementById('chatbot-content');
+            chatContent.scrollTop = chatContent.scrollHeight;
+            
+            // Call backend API
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                const data = await response.json();
+                // Handle newlines in response
+                const formattedReply = data.reply.replace(/\n/g, '<br>');
+                
+                // Hide typing indicator and add bot response
+                typingIndicator.classList.add('hidden');
+                addMessage(formattedReply, 'bot');
+            } catch (error) {
+                // Hide typing indicator and show error message
+                typingIndicator.classList.add('hidden');
+                addMessage('Lỗi kết nối chatbot. Vui lòng thử lại.', 'bot');
+            }
+            
+            // Scroll to bottom again
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+
+        // Handle Enter key press
+        document.getElementById('chatbot-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Close chatbot when clicking outside
+        document.addEventListener('click', function(event) {
+            const chatbotWindow = document.getElementById('chatbot-window');
+            const chatbotBtn = document.getElementById('chatbot-btn');
+            
+            if (!chatbotWindow.contains(event.target) && !chatbotBtn.contains(event.target) && 
+                !chatbotWindow.classList.contains('invisible')) {
+                toggleChatbot();
+            }
+        });
+
+        // Handle mobile viewport changes
+        function handleViewportChange() {
+            const chatbotWindow = document.getElementById('chatbot-window');
+            if (window.innerWidth <= 1024) {
+                // Mobile view
+                if (!chatbotWindow.classList.contains('invisible')) {
+                    document.body.style.overflow = 'hidden';
+                }
+            } else {
+                // Desktop view
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Initial check
+        handleViewportChange();
+
+        // Listen for window resize
+        window.addEventListener('resize', handleViewportChange);
+    </script>
+    {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.overlay');
+            
+            if (mobileMenuButton && sidebar && overlay) {
+                mobileMenuButton.addEventListener('click', () => {
+                    sidebar.classList.toggle('open');
+                    overlay.classList.toggle('open');
+                    
+                    // Toggle body overflow
+                    if (sidebar.classList.contains('open')) {
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        document.body.style.overflow = '';
+                    }
+                });
+                
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+                
+                const menuLinks = document.querySelectorAll('.menu-link');
+                menuLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth <= 1024) {
+                            sidebar.classList.remove('open');
+                            overlay.classList.remove('open');
+                            document.body.style.overflow = '';
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

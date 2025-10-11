@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Upload {{ subject }} | CodeJourney
+{% endblock %}
+
+{% block link %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e1e2f',
+                        secondary: '#2a2a3f',
+                        accent: '#4f46e5'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .file-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .file-upload-area {
+            border: 2px dashed #4b5563;
+            transition: all 0.3s ease;
+        }
+        .file-upload-area:hover {
+            border-color: #6366f1;
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+        .file-upload-area.dragover {
+            border-color: #6366f1;
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto px-4 py-8 max-w-6xl bg-primary text-gray-100 min-h-screen">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+        <div class="flex items-center">
+            <i class="fas fa-code text-3xl text-indigo-400 mr-3"></i>
+            <h1 class="text-3xl font-bold text-indigo-400">Upload File</h1>
+        </div>
+        <a href="{{ url_for('view_subject', subject=subject) }}" class="flex items-center space-x-3">
+            <div class="w-3 h-8 rounded-full bg-purple-500"></div>
+            <div class="w-3 h-8 rounded-full bg-blue-500 opacity-70"></div>
+            <div class="w-3 h-8 rounded-full bg-indigo-500 opacity-50"></div>
+        </a>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-600{% else %}bg-green-600{% endif %} text-white flex items-center">
+                    <i class="fas {% if category == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} mr-2"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Upload Section -->
+    <div class="bg-secondary rounded-xl p-6 mb-8 shadow-lg">
+        <h2 class="text-2xl font-semibold text-indigo-300 mb-6 flex items-center">
+            <i class="fas fa-cloud-upload-alt mr-3"></i> Tải Lên File Cho Môn {{ subject }}
+        </h2>
+        
+        <form id="uploadForm" method="POST" action="{{ url_for('upload_file', subject=subject) }}" enctype="multipart/form-data" class="space-y-6">
+            <!-- File Title Input -->
+            <div>
+                <label for="title" class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fas fa-heading mr-2"></i>Đặt Tên File
+                </label>
+                <input type="text" id="title" name="title" required
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400 transition-all"
+                    placeholder="Nhập tên file...">
+            </div>
+            
+            <!-- File Upload Area -->
+            <div>
+                <label for="file" class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fas fa-file mr-2"></i>Chọn File
+                </label>
+                <div id="dropArea" class="file-upload-area rounded-lg p-8 text-center cursor-pointer">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <i class="fas fa-file-upload text-4xl text-indigo-400 mb-2"></i>
+                        <p class="text-gray-400">Kéo thả file vào đây hoặc click để chọn</p>
+                        <p class="text-xs text-gray-500 mt-1">Hỗ trợ mọi loại file</p>
+                    </div>
+                    <input type="file" id="file" name="file" required class="hidden">
+                </div>
+                <div id="fileNameDisplay" class="mt-2 text-indigo-300 text-sm hidden">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    <span id="selectedFileName">No file selected</span>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                <button type="submit"
+                    class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
+                    <i class="fas fa-upload mr-2"></i> Tải Lên
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- File List Section -->
+    <div class="bg-secondary rounded-xl p-6 shadow-lg">
+        <h2 class="text-2xl font-semibold text-indigo-300 mb-6 flex items-center">
+            <i class="fas fa-list-ul mr-3"></i> Danh Sách File Hiện Có
+        </h2>
+        
+        {% if files %}
+            <ul class="space-y-3" id="fileList">
+                {% for file in files %}
+                    <li class="file-item bg-gray-700 rounded-lg p-4 flex items-center justify-between transition-all duration-200">
+                        <div class="flex items-center space-x-3">
+                            <span class="file-title font-medium">{{ file.title }}</span>
+                        </div>
+                        <form method="POST" action="{{ url_for('delete_file', file_id=file.id) }}" class="inline">
+                            <button type="submit" onclick="return confirm('Bạn có chắc chắn muốn xóa file này không?')"
+                                class="text-red-400 hover:text-red-300 transition-colors flex items-center">
+                                <i class="fas fa-trash-alt mr-1"></i> Xóa {{acp}} {{user_id}}
+                            </button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="text-center py-8 text-gray-400">
+                <i class="fas fa-folder-open text-4xl mb-3"></i>
+                <p>Chưa có file nào được tải lên</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('file');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const selectedFileName = document.getElementById('selectedFileName');
+        const uploadForm = document.getElementById('uploadForm');
+
+        // Mở file input khi click vào drop area
+        dropArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Ngăn chặn hành vi mặc định cho drag-and-drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Highlight khi drag
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false);
+        });
+
+        // Xử lý drop file
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFileNameUI(files[0].name);
+            }
+        }
+
+        // Xử lý chọn file qua input
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                updateFileNameUI(this.files[0].name);
+            }
+        });
+
+        function updateFileNameUI(fileName) {
+            selectedFileName.textContent = fileName;
+            fileNameDisplay.classList.remove('hidden');
+        }
+
+        // Kiểm tra form trước khi submit
+        uploadForm.addEventListener('submit', (e) => {
+            const title = document.getElementById('title').value.trim();
+            const file = fileInput.files[0];
+            if (!title || !file) {
+                e.preventDefault();
+                alert('Vui lòng điền đầy đủ thông tin (tên file và file)!');
+            }
+        });
+    });
+</script>
+{% endblock %}

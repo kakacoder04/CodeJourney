@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổ Chức {{ name }} | CodeJourney</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1e1e2f;
+            color: #ffffff;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-join {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .btn-joined {
+            background: linear-gradient(135deg, #3fada8 0%, #11998e 100%);
+        }
+        
+        .btn-pending {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .org-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .avatar-container {
+            background: linear-gradient(135deg, #2a2b3d 0%, #3a3b4d 100%);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .avatar-preview {
+            display: none;
+        }
+        
+        .avatar-icon {
+            display: block;
+        }
+        
+        /* Button styles */
+        .desktop-menu button {
+            min-width: 8rem;
+        }
+        
+        .mobile-menu button {
+            min-width: 100%;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #2a2b3d;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+        
+        /* Mobile menu */
+        .mobile-menu {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .desktop-menu {
+                display: none !important;
+            }
+            
+            .mobile-menu {
+                display: block !important;
+            }
+            
+            .mobile-menu-content {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
+            }
+            
+            .mobile-menu.active .mobile-menu-content {
+                max-height: 500px;
+                transition: max-height 0.5s ease-in;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-3xl md:text-4xl font-bold gradient-text">Tổ Chức {{ name }}</h1>
+                <p class="text-gray-400 mt-1 hidden md:block">Quản lý và tham gia các tổ chức của bạn</p>
+            </div>
+            
+            <!-- Desktop Menu -->
+            <div class="desktop-menu flex flex-wrap gap-3 justify-center md:justify-end">
+                <button onclick="window.location.href='{{ url_for('organization', view_mode=toggle_mode) }}'"
+                        class="btn-gradient px-4 py-2 rounded-xl text-white font-medium flex items-center gap-2 hover:shadow-lg transition-all w-32 justify-center">
+                    <i class="fas fa-exchange-alt"></i> {{ toggle_label[:8] }}
+                </button>
+                <button onclick="window.location.href='{{ url_for('create_organization') }}'"
+                        class="btn-gradient px-4 py-2 rounded-xl text-white font-medium flex items-center gap-2 hover:shadow-lg transition-all w-32 justify-center">
+                    <i class="fas fa-plus"></i> Tạo T.Chức
+                </button>
+                <button onclick="window.location.href='{{ url_for('joined_organizations') }}'"
+                        class="btn-gradient px-4 py-2 rounded-xl text-white font-medium flex items-center gap-2 hover:shadow-lg transition-all w-32 justify-center">
+                    <i class="fas fa-users"></i> Đã TGia
+                </button>
+                <button onclick="window.location.href='{{ url_for('my_organizations') }}'"
+                        class="btn-gradient px-4 py-2 rounded-xl text-white font-medium flex items-center gap-2 hover:shadow-lg transition-all w-32 justify-center">
+                    <i class="fas fa-user-shield"></i> Của Tôi
+                </button>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div class="mobile-menu w-full md:w-auto">
+                <button onclick="toggleMobileMenu()" class="w-full flex justify-between items-center px-4 py-3 bg-indigo-900/50 rounded-lg text-white">
+                    <span>Menu Tổ Chức</span>
+                    <i class="fas fa-chevron-down transition-transform duration-300"></i>
+                </button>
+                <div class="mobile-menu-content bg-indigo-900/20 rounded-lg mt-2">
+                    <div class="flex flex-col gap-2 p-2">
+                        <button onclick="window.location.href='{{ url_for('organization', view_mode=toggle_mode) }}'"
+                                class="w-full text-center px-4 py-2 rounded-lg bg-indigo-800/50 hover:bg-indigo-700/50 transition-colors flex items-center gap-2 justify-center">
+                            <i class="fas fa-exchange-alt"></i> {{ toggle_label }}
+                        </button>
+                        <button onclick="window.location.href='{{ url_for('create_organization') }}'"
+                                class="w-full text-center px-4 py-2 rounded-lg bg-indigo-800/50 hover:bg-indigo-700/50 transition-colors flex items-center gap-2 justify-center">
+                            <i class="fas fa-plus"></i> Tạo T.Chức
+                        </button>
+                        <button onclick="window.location.href='{{ url_for('joined_organizations') }}'"
+                                class="w-full text-center px-4 py-2 rounded-lg bg-indigo-800/50 hover:bg-indigo-700/50 transition-colors flex items-center gap-2 justify-center">
+                            <i class="fas fa-users"></i> Đã TGia
+                        </button>
+                        <button onclick="window.location.href='{{ url_for('my_organizations') }}'"
+                                class="w-full text-center px-4 py-2 rounded-lg bg-indigo-800/50 hover:bg-indigo-700/50 transition-colors flex items-center gap-2 justify-center">
+                            <i class="fas fa-user-shield"></i> Của Tôi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Organization Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for org in organizations %}
+            <div class="org-card glass-effect rounded-2xl p-6 transition-all duration-300 fade-in" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="avatar-container w-16 h-16 rounded-full border-2 border-dashed border-[#3a3b4d] flex items-center justify-center overflow-hidden">
+                        {% if org.image_path %}
+                            <img class="avatar-preview w-full h-full object-cover"
+                                 src="{{ url_for('static', filename=org.image_path) }}"
+                                 alt="{{ org.name }} Avatar"
+                                 onload="this.classList.remove('hidden'); this.classList.add('block'); this.parentElement.querySelector('.avatar-icon').classList.add('hidden');"
+                                onerror="this.classList.add('hidden'); this.parentElement.querySelector('.avatar-icon').classList.remove('hidden');">
+                        {% endif %}
+                        <i class="avatar-icon fas fa-camera text-gray-500 text-xl"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <a href="{{ url_for('organization_detail', organization_id=org.id) }}"
+                            class="text-xl font-semibold text-white hover:text-indigo-400 transition-colors truncate block">
+                            {{ org.name }} <i class="fas fa-chevron-right ml-1 text-sm opacity-70"></i>
+                        </a>
+                        <p class="text-sm text-gray-400 text-left truncate">ID: {{ org.id }}</p>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="text-sm text-gray-300">
+                        <i class="fas fa-users mr-1"></i> {{ org.members|length or '0' }} thành viên
+                    </div>
+                    {% set pending_request = org.join_requests | selectattr('user_id', 'equalto', session['user_id']) | selectattr('status', 'equalto', 'pending') | list %}
+                    {% if org.id in joined_organizations %}
+                        <span class="btn-joined px-4 py-2 rounded-full text-sm font-medium text-white whitespace-nowrap">
+                            <i class="fas fa-check-circle mr-2"></i> Đã tham gia
+                        </span>
+                    {% elif pending_request|length > 0 %}
+                        <span class="btn-pending px-4 py-2 rounded-full text-sm font-medium text-white whitespace-nowrap">
+                            <i class="fas fa-clock mr-2"></i> Đang chờ duyệt
+                        </span>
+                    {% else %}
+                        <form action="{{ url_for('join_organization', organization_id=org.id) }}" method="post" class="join-form">
+                            <button type="submit" class="btn-join px-4 py-2 rounded-full text-sm font-medium text-white hover:shadow-lg transition-all whitespace-nowrap">
+                                <i class="fas fa-user-plus mr-2"></i> Tham gia
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Empty State -->
+        {% if not organizations %}
+        <div class="glass-effect rounded-2xl p-8 md:p-12 text-center mt-8">
+            <div class="inline-block p-4 mb-4 rounded-full bg-indigo-900/30">
+                <i class="fas fa-building text-4xl md:text-5xl text-indigo-400"></i>
+            </div>
+            <h3 class="text-xl md:text-2xl font-medium text-gray-300">Không có tổ chức nào</h3>
+            <p class="text-gray-500 mt-2 mb-6 max-w-md mx-auto">Không có tổ chức {{ name|lower }} nào để hiển thị.</p>
+            <button onclick="window.location.href='{{ url_for('create_organization') }}'"
+                    class="btn-gradient px-6 py-3 rounded-xl text-white font-medium inline-flex items-center gap-2 hover:shadow-lg transition-all">
+                <i class="fas fa-plus"></i> Tạo tổ chức đầu tiên
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation for organization cards
+            const orgCards = document.querySelectorAll('.org-card');
+            orgCards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-5px)';
+                    card.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.3)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                    card.style.boxShadow = 'none';
+                });
+            });
+        });
+        
+        function toggleMobileMenu() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const chevron = mobileMenu.querySelector('i');
+            
+            mobileMenu.classList.toggle('active');
+            
+            if (mobileMenu.classList.contains('active')) {
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+    </script>
+</body>
+</html>

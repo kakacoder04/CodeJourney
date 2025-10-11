@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Cửa Hàng | CodeJourney{% endblock %}
+
+{% block link %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e1e2f',
+                        secondary: '#2a2a3f',
+                        accent: '#4f46e5',
+                        tealAccent: '#4fd1c5'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .fade-out {
+            animation: fadeOut 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(20px); }
+        }
+        .item-card {
+            transition: all 0.3s ease;
+        }
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .purchased-btn {
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto bg-primary text-gray-200 min-h-screen max-w-6xl" style="background-color: transparent; border: cyan solid 5px; border-radius: 2%;">
+    <div class="mx-auto px-4 py-8 max-w-6xl">
+        <!-- Tiêu đề -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-purple-400 mb-2">Tăng Sức Mạnh</h1>
+            <div class="flex items-center justify-center space-x-2">
+                <p class="text-xl">Số điểm hiện tại của bạn:</p>
+                <strong id="user-points" class="text-2xl text-yellow-300 flex items-center">
+                    {{ user.purchase_points }} <i class="fas fa-gem ml-1 text-blue-400"></i>
+                </strong>
+            </div>
+        </header>
+
+        <!-- Thông báo thành công/thất bại -->
+        <div id="success-message" class="fixed top-4 right-4 z-50 hidden">
+            <div class="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 fade-in">
+                <i class="fas fa-check-circle"></i>
+                <p id="success-text" class="font-medium">Mua thành công!</p>
+            </div>
+        </div>
+
+        <!-- Nội dung cửa hàng -->
+        <div class="space-y-16">
+            <!-- Danh mục biểu tượng -->
+            <section class="store-category">
+                <div class="flex items-center mb-6">
+                    <div class="w-2 h-8 bg-purple-500 rounded-full mr-3"></div>
+                    <h2 class="text-2xl font-bold text-purple-300">Biểu Tượng</h2>
+                </div>
+                <div class="store-items grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for item in icons %}
+                    <div class="item-card bg-secondary rounded-xl overflow-hidden shadow-md">
+                        <div class="p-4 flex justify-center bg-[#333348]">
+                            <img src="{{ url_for('static', filename='uploads/set_icon/' + item.image) }}" alt="{{ item.name }}" class="w-24 h-24 object-contain">
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2 text-purple-200">{{ item.name }}</h3>
+                            <p class="text-gray-400 mb-4">{{ item.description }}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-yellow-300 font-medium flex items-center">
+                                    {{ item.price }} <i class="fas fa-gem ml-1 text-blue-400 text-sm"></i>
+                                </span>
+                                {% set purchased = user.purchased_items | selectattr('item_id', 'equalto', item.id) | list %}
+                                <form method="POST" action="{{ url_for('buy_item', item_id=item.id) }}">
+                                    <button type="submit" class="{% if purchased %}purchased-btn bg-gray-600 cursor-not-allowed{% else %}bg-purple-600 hover:bg-purple-700{% endif %} text-white px-4 py-2 rounded-lg transition" {% if purchased %}disabled{% endif %}>
+                                        {% if purchased %}Đã Mua{% else %}Mua{% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Danh mục khung viền -->
+            <section class="store-category">
+                <div class="flex items-center mb-6">
+                    <div class="w-2 h-8 bg-blue-500 rounded-full mr-3"></div>
+                    <h2 class="text-2xl font-bold text-blue-300">Khung Viền</h2>
+                </div>
+                <div class="store-items grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for item in frames %}
+                    <div class="item-card bg-secondary rounded-xl overflow-hidden shadow-md">
+                        <div class="p-4 flex justify-center bg-[#333348]">
+                            <div class="relative w-32 h-32">
+                                <img src="{{ url_for('static', filename='uploads/frames/' + item.image) }}" alt="{{ item.name }}" class="w-full h-full object-cover rounded-full">
+                                <div class="absolute inset-0 border-4 border-{% if 'tím' in item.name|lower %}purple-500{% elif 'vàng' in item.name|lower %}yellow-500 animate-pulse{% elif 'xanh' in item.name|lower %}green-500{% else %}blue-500{% endif %} rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-semibold mb-2 text-blue-200">{{ item.name }}</h3>
+                            <p class="text-gray-400 mb-4">{{ item.description }}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-yellow-300 font-medium flex items-center">
+                                    {{ item.price }} <i class="fas fa-gem ml-1 text-blue-400 text-sm"></i>
+                                </span>
+                                {% set purchased = user.purchased_frames | selectattr('frame_id', 'equalto', item.id) | list %}
+                                <form method="POST" action="{{ url_for('buy_item', item_id=item.id) }}">
+                                    <button type="submit" class="{% if purchased %}purchased-btn bg-gray-600 cursor-not-allowed{% else %}bg-blue-600 hover:bg-blue-700{% endif %} text-white px-4 py-2 rounded-lg transition" {% if purchased %}disabled{% endif %}>
+                                        {% if purchased %}Đã Mua{% else %}Mua{% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const forms = document.querySelectorAll("form[action*='buy_item']");
+        forms.forEach(form => {
+            form.addEventListener("submit", (event) => {
+                event.preventDefault();
+                const successMessage = document.getElementById("success-message");
+                const successText = document.getElementById("success-text");
+                const successDiv = successMessage.querySelector('div');
+                const userPointsElement = document.getElementById("user-points");
+                const formData = new FormData(form);
+
+                fetch(form.action, {
+                    method: form.method,
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    successText.textContent = data.message;
+                    successMessage.classList.remove("hidden");
+                    successDiv.classList.add("fade-in");
+                    successDiv.classList.remove("fade-out");
+                    if (data.success) {
+                        successDiv.classList.remove("bg-red-600");
+                        successDiv.classList.add("bg-green-600");
+                        userPointsElement.innerHTML = `${data.new_points} <i class="fas fa-gem ml-1 text-blue-400"></i>`;
+                        const button = form.querySelector("button");
+                        button.classList.add("purchased-btn", "bg-gray-600", "cursor-not-allowed");
+                        button.classList.remove("bg-purple-600", "hover:bg-purple-700", "bg-blue-600", "hover:bg-blue-700");
+                        button.textContent = "Đã Mua";
+                        button.disabled = true;
+                    } else {
+                        successDiv.classList.remove("bg-green-600");
+                        successDiv.classList.add("bg-red-600");
+                    }
+                    setTimeout(() => {
+                        successDiv.classList.remove("fade-in");
+                        successDiv.classList.add("fade-out");
+                        setTimeout(() => {
+                            successMessage.classList.add("hidden");
+                        }, 300);
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error("Lỗi:", error);
+                    successText.textContent = "Lỗi khi mua vật phẩm. Vui lòng thử lại!";
+                    successMessage.classList.remove("hidden");
+                    successDiv.classList.add("fade-in", "bg-red-600");
+                    successDiv.classList.remove("fade-out", "bg-green-600");
+                    setTimeout(() => {
+                        successDiv.classList.remove("fade-in");
+                        successDiv.classList.add("fade-out");
+                        setTimeout(() => {
+                            successMessage.classList.add("hidden");
+                        }, 300);
+                    }, 3000);
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

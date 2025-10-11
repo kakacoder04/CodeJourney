@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}Chi Tiết Thử Thách | CodeJourney{% endblock %}
+
+{% block link %}
+    <style>
+        .code-editor {
+            font-family: 'Fira Code', 'Courier New', monospace;
+            background-color: #1e293b;
+            color: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-height: 300px;
+            resize: vertical;
+            tab-size: 4;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .testcase-box {
+            background-color: #f1f5f9;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        
+        .result-pass {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .result-fail {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .result-accept {
+            background-color: #dcfce7;
+            color: #166534;
+            font-weight: bold;
+        }
+        
+        .result-wrong {
+            background-color: #fee2e2;
+            color: #991b1b;
+            font-weight: bold;
+        }
+        
+        .result-timeout {
+            background-color: #fef3c7;
+            color: #92400e;
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto px-4 py-6 max-w-6xl" style="border: rgb(253, 0, 0) solid 1px; border-radius: 3%; background-color: #1e293b;">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <div class="w-full lg:w-2/5 bg-[#1e1e2f] rounded-xl shadow-md p-6" style="border: cyan solid 1px;">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-trophy text-yellow-500 text-2xl mr-3"></i>
+                <h1 class="text-2xl font-bold text-yellow-500">Chi Tiết Thử Thách</h1>
+            </div>
+                    
+            <div class="mb-8">
+                <div class="bg-cyan-300 p-4 rounded-lg border border-blue-100">
+                    <pre class="text-black leading-relaxed overflow-auto">{{ challenge.description }}</pre>
+                </div>
+            </div>
+                    
+            <div>
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-vial text-purple-500 mr-2"></i>
+                    <h3 class="text-xl font-semibold text-purple-500">Test Cases Mẫu</h3>
+                </div>
+                        
+                <div class="space-y-4">
+                    {% for tc in challenge.testcases if tc.source == "manual" %}
+                    <div class="border rounded-lg overflow-hidden">
+                        <div class="px-4 py-2 border-b">
+                            <span class="font-medium text-yellow-400">Test Case</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                            <div>
+                                <h4 class="text-sm font-medium text-black-600 mb-1">Input:</h4>
+                                <div class="testcase-box text-black bg-cyan-300">{{ tc['input'] }}</div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-black-600 mb-1">Output:</h4>
+                                <div class="testcase-box text-black bg-cyan-300">{{ tc['output'] }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-3/5">
+            <div class="bg-[#1e1e2f] rounded-xl shadow-md p-6 mb-6" style="border: cyan solid 1px;">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-code text-blue-400 mr-2"></i>
+                    <h3 class="text-xl font-semibold text-blue-400">Code Editor</h3>
+                </div>
+                
+                <textarea id="code-editor" class="code-editor" placeholder="Code tại đây...">{{ challenge.sample_code or '' }}</textarea>
+                
+                <div class="flex justify-end mt-4">
+                    <button id="run-code" data-challenge-id="{{ challenge.id }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200 flex items-center">
+                        <i class="fas fa-play mr-2"></i> Chạy Code
+                    </button>
+                </div>
+            </div>
+            
+            <div id="results" class="bg-[#1e1e2f] rounded-xl shadow-md p-6" style="border: cyan solid 1px;">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-poll text-green-400 mr-2"></i>
+                    <h3 class="text-xl font-semibold text-green-400">Kết Quả</h3>
+                </div>
+                
+                <div id="results-content" class="min-h-40 flex items-center justify-center text-gray-400">
+                    <p>Kết quả sẽ hiển thị ở đây sau khi bạn chạy code.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const editor = document.getElementById('code-editor');
+    editor.addEventListener('keydown', function(event) {
+        if (event.key === 'Tab') {
+            event.preventDefault();
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            const tab = '    ';
+            this.value = this.value.substring(0, start) + tab + this.value.substring(end);
+            this.selectionStart = this.selectionEnd = start + tab.length;
+        }
+    });
+
+    document.getElementById('run-code').addEventListener('click', async () => {
+        const code = editor.value.trim();
+        const challengeId = document.getElementById('run-code').dataset.challengeId;
+        const resultsDiv = document.getElementById('results-content');
+
+        if (!code) {
+            resultsDiv.innerHTML = `
+                <div class="result-wrong w-full p-4 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-2xl mr-2"></i>
+                        <p class="text-xl">LỖI</p>
+                    </div>
+                    <p class="text-sm mt-1">Vui lòng nhập code trước khi chạy!</p>
+                </div>
+            `;
+            return;
+        }
+
+        if (!challengeId) {
+            resultsDiv.innerHTML = `
+                <div class="result-wrong w-full p-4 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-2xl mr-2"></i>
+                        <p class="text-xl">LỖI</p>
+                    </div>
+                    <p class="text-sm mt-1">Không tìm thấy thử thách. Vui lòng tải lại trang!</p>
+                </div>
+            `;
+            return;
+        }
+
+        resultsDiv.innerHTML = `
+            <div class="flex items-center space-x-2">
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                <span>Đang chạy code...</span>
+            </div>
+        `;
+
+        try {
+            const response = await fetch(`/run_code/${challengeId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+            if (!response.ok) throw new Error(`Lỗi mạng: ${response.status}`);
+            const data = await response.json();
+            displayResults(data);
+        } catch (error) {
+            console.error('Lỗi:', error);
+            resultsDiv.innerHTML = `
+                <div class="result-wrong w-full p-4 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-2xl mr-2"></i>
+                        <p class="text-xl">LỖI</p>
+                    </div>
+                    <p class="text-sm mt-1">Không thể chạy code: ${error.message}. Vui lòng thử lại!</p>
+                </div>
+            `;
+        }
+    });
+
+    function displayResults(data) {
+        const resultsDiv = document.getElementById('results-content');
+        if (data.status === 'ACCEPT') {
+            resultsDiv.innerHTML = `
+                <div class="result-accept w-full p-4 rounded-lg text-center">
+                    <i class="fas fa-check-circle text-3xl mb-2"></i>
+                    <p class="text-xl">ACCEPTED!</p>
+                    <p class="text-sm mt-2">Chúc mừng! Code của bạn đã vượt qua tất cả test cases.</p>
+                </div>
+            `;
+        } else if (data.status === 'WRONG') {
+            resultsDiv.innerHTML = `
+                <div class="result-wrong w-full p-4 rounded-lg text-center">
+                    <i class="fas fa-times-circle text-3xl mb-2"></i>
+                    <p class="text-xl">WRONG!</p>
+                    <p class="text-sm mt-2">Code của bạn chưa vượt qua tất cả test cases.</p>
+                </div>
+            `;
+        } else if (data.status === 'TIME_LIMIT') {
+            resultsDiv.innerHTML = `
+                <div class="result-timeout w-full p-4 rounded-lg text-center">
+                    <i class="fas fa-clock text-3xl mb-2"></i>
+                    <p class="text-xl">TLE!</p>
+                    <p class="text-sm mt-2">Code của bạn chạy quá lâu. Hãy tối ưu thuật toán.</p>
+                </div>
+            `;
+        } else {
+            resultsDiv.innerHTML = `
+                <div class="result-wrong w-full p-4 rounded-lg text-center">
+                    <i class="fas fa-exclamation-circle text-3xl mb-2"></i>
+                    <p class="text-xl">ERROR!</p>
+                    <p class="text-sm mt-2">${data.error || 'Không thể chạy code. Vui lòng thử lại!'}</p>
+                </div>
+            `;
+        }
+    }
+</script>
+{% endblock %}

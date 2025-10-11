@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+
+{% block title %} Thống Kê | CodeJourney {% endblock %}
+
+{% block link %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            background-color: #1e1e2f;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .ai-comment {
+            border-left: 4px solid #4f46e5;
+            transition: all 0.3s ease;
+        }
+        .ai-comment:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .card {
+            background-color: #2a2a3c;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .text-primary {
+            color: #a5b4fc;
+        }
+        .text-secondary {
+            color: #c7d2fe;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 relative z-0">
+    <header class="mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-indigo-300">Thống Kê Học Tập Của: <span class="text-red-400">{{name}}</span></h1>
+    </header>
+
+    <!-- Thẻ Thống Kê -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div class="card p-4 flex items-center">
+            <div class="p-3 bg-indigo-900 bg-opacity-50 rounded-full mr-4">
+                <i class="fas fa-book-open text-indigo-400 text-xl"></i>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm">Bài Học Đã Hoàn Thành</p>
+                <h3 class="text-xl font-bold text-indigo-300">{{ stats.lessons.total }}</h3>
+                <p class="text-green-400 text-xs font-medium">+{{ stats.lessons.weekly }} trong 7 ngày vừa qua</p>
+            </div>
+        </div>
+
+        <div class="card p-4 flex items-center">
+            <div class="p-3 bg-blue-900 bg-opacity-50 rounded-full mr-4">
+                <i class="fas fa-trophy text-blue-400 text-xl"></i>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm">Thử Thách Đã Hoàn Thành</p>
+                <h3 class="text-xl font-bold text-blue-300">{{ stats.challenges.total }}</h3>
+                <p class="text-green-400 text-xs font-medium">+{{ stats.challenges.weekly }} trong 7 ngày vừa qua</p>
+            </div>
+        </div>
+
+        <div class="card p-4 flex items-center">
+            <div class="p-3 bg-purple-900 bg-opacity-50 rounded-full mr-4">
+                <i class="fas fa-fire-alt text-purple-400 text-xl"></i>
+            </div>
+            <div>
+                <p class="text-gray-400 text-sm">Chuỗi Tiến Độ</p>
+                <h3 class="text-xl font-bold text-purple-300">{{ stats.streak }} ngày</h3>
+                <p class="text-green-400 text-xs font-medium">Tiếp tục cố gắng!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu Đồ Tiến Độ -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+        <div class="card p-4">
+            <h2 class="text-lg font-semibold text-indigo-300 mb-4">Tiến Độ Học Tập</h2>
+            <div class="chart-container">
+                <canvas id="dailyLearningChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card p-4">
+            <h2 class="text-lg font-semibold text-indigo-300 mb-4">Tiến Độ Thử Thách</h2>
+            <div class="chart-container">
+                <canvas id="challengeCompletionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tiến Độ Thử Thách và Phản Hồi AI -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+        <div class="card p-4">
+            <h2 class="text-lg font-semibold text-indigo-300 mb-4">Tiến Độ Thử Thách</h2>
+            <div class="flex flex-col space-y-4">
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-xs font-medium text-gray-400">Cấp Độ Sơ Cấp</span>
+                        <span class="text-xs font-medium text-green-400">{{ stats.challenge_progress.beginner.completed }}/{{ stats.challenge_progress.beginner.total }}</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-1.5">
+                        <div class="bg-green-500 h-1.5 rounded-full" style="width: {{ (stats.challenge_progress.beginner.completed / stats.challenge_progress.beginner.total * 100) if stats.challenge_progress.beginner.total > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-xs font-medium text-gray-400">Cấp Độ Trung Cấp</span>
+                        <span class="text-xs font-medium text-blue-400">{{ stats.challenge_progress.intermediate.completed }}/{{ stats.challenge_progress.intermediate.total }}</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-1.5">
+                        <div class="bg-blue-500 h-1.5 rounded-full" style="width: {{ (stats.challenge_progress.intermediate.completed / stats.challenge_progress.intermediate.total * 100) if stats.challenge_progress.intermediate.total > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-xs font-medium text-gray-400">Cấp Độ Nâng Cao</span>
+                        <span class="text-xs font-medium text-purple-400">{{ stats.challenge_progress.advanced.completed }}/{{ stats.challenge_progress.advanced.total }}</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-1.5">
+                        <div class="bg-purple-500 h-1.5 rounded-full" style="width: {{ (stats.challenge_progress.advanced.completed / stats.challenge_progress.advanced.total * 100) if stats.challenge_progress.advanced.total > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-xs font-medium text-gray-400">Số Bài Học Hoàn Thành</span>
+                        <span class="text-xs font-medium text-red-400">{{ stats.lessons.total }}/{{ stats.lessons.full }}</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-1.5">
+                        <div class="bg-red-500 h-1.5 rounded-full" style="width: {{ (stats.lessons.total / stats.lessons.full * 100) if stats.lessons.full > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <div class="relative">
+                    <svg class="w-28 h-28 mx-auto" viewBox="0 0 100 100">
+                        <circle class="stroke-gray-700" stroke-width="8" cx="50" cy="50" r="40" fill="transparent"></circle>
+                        <circle class="progress-ring__circle stroke-indigo-500" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="40" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="{{ 251.2 * (1 - stats.overall_completion / 100) }}"></circle>
+                        <text x="50" y="53" font-family="Arial" font-size="14" text-anchor="middle" fill="#a5b4fc" font-weight="bold">{{ stats.overall_completion }}%</text>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center mt-20">
+                        <p class="text-xs text-gray-400">Tỷ Lệ Hoàn Thành Tổng Thể</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-2">
+                <p class="text-xs font-medium text-indigo-400">Bạn đã vượt qua {{ stats.percentile_rank|round(1) }}% người học tại CodeJourney</p>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 card p-4">
+            <h2 class="text-lg font-semibold text-indigo-300 mb-4">Nhận Xét Học Tập Từ AI</h2>
+            <div class="space-y-3">
+                {% for insight_key, insight in stats.ai_insights.items() %}
+                <div class="ai-comment bg-{{ insight_key == 'consistency' and 'indigo' or insight_key == 'strengths' and 'green' or 'yellow' }}-900 bg-opacity-30 p-3 rounded-lg">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 p-2 bg-{{ insight_key == 'consistency' and 'indigo' or insight_key == 'strengths' and 'green' or 'yellow' }}-800 bg-opacity-50 rounded-full mr-3">
+                            <i class="fas {{ insight_key == 'consistency' and 'fa-robot' or insight_key == 'strengths' and 'fa-check-circle' or 'fa-lightbulb' }} text-{{ insight_key == 'consistency' and 'indigo' or insight_key == 'strengths' and 'green' or 'yellow' }}-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-{{ insight_key == 'consistency' and 'indigo' or insight_key == 'strengths' and 'green' or 'yellow' }}-300">{{ insight.title }}</h4>
+                            <p class="text-gray-300 text-xs">{{ insight.content }}</p>
+                            <div class="mt-1">
+                                {% for tag in insight.tags %}
+                                <span class="inline-block bg-{{ insight_key == 'consistency' and 'indigo' or insight_key == 'strengths' and 'green' or 'yellow' }}-800 bg-opacity-30 text-{{ insight_key == 'consistency' and 'indigo' or insight_key == 'strengths' and 'green' or 'yellow' }}-300 text-xxs px-2 py-0.5 rounded-full mr-1">{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Biểu đồ Tiến Độ Học Tập
+    const dailyLearningCtx = document.getElementById('dailyLearningChart').getContext('2d');
+    new Chart(dailyLearningCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'],
+            datasets: [{
+                label: 'Tổng Bài Học + Thử Thách Hoàn Thành',
+                data: [
+                    {% for day in stats.daily_activity %}
+                        {{ day.lessons_complete_day + day.challenges_completed }},
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                borderColor: 'rgba(79, 70, 229, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Số lượng hoàn thành',
+                        color: '#a5b4fc'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#c7d2fe'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Thứ trong tuần',
+                        color: '#a5b4fc'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#c7d2fe'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        color: '#a5b4fc'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Biểu đồ Tiến Độ Thử Thách
+    const challengeCompletionCtx = document.getElementById('challengeCompletionChart').getContext('2d');
+    new Chart(challengeCompletionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Sơ Cấp', 'Trung Cấp', 'Nâng Cao'],
+            datasets: [{
+                data: [
+                    {{ stats.challenge_progress.beginner.completed }},
+                    {{ stats.challenge_progress.intermediate.completed }},
+                    {{ stats.challenge_progress.advanced.completed }}
+                ],
+                backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6'],
+                borderColor: ['#1e1e2f', '#1e1e2f', '#1e1e2f'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#a5b4fc'
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

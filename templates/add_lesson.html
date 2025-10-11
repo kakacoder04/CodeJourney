@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+
+{% block title %}Thêm Bài Học | CodeJourney{% endblock %}
+
+{% block link %}
+    <style>
+        body {
+            background-color: #1e1e2f;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            background-color: #4f46e5;
+            color: white;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .file-label:hover {
+            background-color: #6366f1;
+        }
+        
+        .lesson-card {
+            background: linear-gradient(145deg, #252540, #1f1f35);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .lesson-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .form-container {
+            background: linear-gradient(145deg, #252540, #1f1f35);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 8px rgba(79, 70, 229, 0.6);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <h1 class="text-3xl font-bold text-indigo-400 glow-text">
+            <i class="fas fa-book-open mr-2"></i>Quản lý Bài Học
+        </h1>
+        <a href="{{ url_for('admin') }}" class="flex items-center space-x-3">
+            <div class="w-3 h-8 rounded-full bg-purple-500"></div>
+            <div class="w-3 h-8 rounded-full bg-blue-500 opacity-70"></div>
+            <div class="w-3 h-8 rounded-full bg-indigo-500 opacity-50"></div>
+        </a>
+    </div>
+
+    <!-- Add Lesson Form -->
+    <div class="form-container rounded-xl p-6 mb-10 border border-indigo-900/50">
+        <h2 class="text-xl font-semibold mb-6 text-indigo-300 flex items-center">
+            <i class="fas fa-plus-circle mr-3 text-indigo-400"></i>Thêm Bài Học Mới
+        </h2>
+                
+        <form method="POST" action="/admin/add_lesson" enctype="multipart/form-data" class="space-y-6">
+            <!-- Title Input -->
+            <div>
+                <label for="title" class="block text-sm font-medium mb-2 text-gray-300">
+                    Tiêu đề bài học
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-indigo-400">
+                        <i class="fas fa-heading"></i>
+                    </div>
+                    <input type="text" id="title" name="title" required
+                        class="bg-gray-700/50 border border-gray-600/50 text-white text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2.5 placeholder-gray-400"
+                        placeholder="Nhập tiêu đề bài học...">
+                </div>
+            </div>
+
+            <!-- Content Textarea -->
+            <div>
+                <label for="content" class="block text-sm font-medium mb-2 text-gray-300">
+                    Nội dung bài học
+                </label>
+                <textarea id="content" name="content" rows="5"
+                    class="bg-gray-700/50 border border-gray-600/50 text-white text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 placeholder-gray-400"
+                    placeholder="Nhập nội dung bài học..."></textarea>
+            </div>
+
+            <!-- File Upload -->
+            <div>
+                <label class="block text-sm font-medium mb-2 text-gray-300">
+                    Tệp đính kèm
+                </label>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <input type="file" id="files" name="files" class="file-input" 
+                        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.mp4,.mov" multiple>
+                    <label for="files" class="file-label hover:shadow-indigo-500/30 hover:shadow-md">
+                        <i class="fas fa-cloud-upload-alt mr-2"></i> Chọn tệp
+                    </label>
+                    <span id="file-chosen" class="text-sm text-gray-400 mt-2 sm:mt-0">Không có tệp nào được chọn</span>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end">
+                <button type="submit" 
+                    class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-medium text-sm leading-tight uppercase rounded-lg shadow-md hover:shadow-lg hover:from-indigo-700 hover:to-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition duration-150 ease-in-out flex items-center group">
+                    <i class="fas fa-save mr-2 group-hover:scale-110 transition-transform"></i> 
+                    <span class="group-hover:tracking-wide transition-all">Thêm Bài Học</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lessons List -->
+    <div class="form-container rounded-xl p-6 border border-indigo-900/50">
+        <h2 class="text-xl font-semibold mb-6 text-indigo-300 flex items-center">
+            <i class="fas fa-list-ul mr-3 text-indigo-400"></i>Danh sách Bài Học
+        </h2>
+                
+        <div class="space-y-4">
+            {% for lesson in lessons %}
+            <!-- Sample Lesson Items (replace with dynamic content) -->
+            <div class="lesson-card rounded-lg p-4 border border-gray-700/50">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h3 class="font-medium text-lg text-indigo-200">{{ lesson.title }}</h3>
+                        <!-- <p class="text-sm text-gray-400 mt-1">Đã tải lên</p> -->
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="/admin/edit_lesson/{{ lesson.id }}" class="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm rounded hover:shadow-md hover:from-blue-700 hover:to-blue-600 transition flex items-center group">
+                            <i class="fas fa-edit mr-1 group-hover:rotate-6 transition-transform"></i> 
+                            <span>Chỉnh sửa</span>
+                        </a>
+                        <form action="/admin/delete_lesson/{{ lesson.id }}" method="POST" class="inline">
+                            <button class="px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-500 text-white text-sm rounded hover:shadow-md hover:from-red-700 hover:to-red-600 transition flex items-center group">
+                                <i class="fas fa-trash-alt mr-1 group-hover:shake transition-transform"></i> 
+                                <span>Xóa</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show selected file names
+    const fileInput = document.getElementById('files');
+    const fileChosen = document.getElementById('file-chosen');
+    
+    fileInput.addEventListener('change', function() {
+        if (this.files.length === 0) {
+            fileChosen.textContent = 'Không có tệp nào được chọn';
+        } else if (this.files.length === 1) {
+            fileChosen.textContent = this.files[0].name;
+        } else {
+            fileChosen.textContent = `${this.files.length} tệp được chọn`;
+        }
+    });
+    
+    // Add animation to buttons
+    document.querySelectorAll('button, a').forEach(button => {
+        button.addEventListener('mousedown', function() {
+            this.classList.add('transform', 'scale-95');
+        });
+        button.addEventListener('mouseup', function() {
+            this.classList.remove('transform', 'scale-95');
+        });
+        button.addEventListener('mouseleave', function() {
+            this.classList.remove('transform', 'scale-95');
+        });
+    });
+    
+    // Add shake animation for delete button
+    const deleteButtons = document.querySelectorAll('[class*="from-red-"]');
+    deleteButtons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            const icon = this.querySelector('i');
+            icon.classList.add('animate-shake');
+        });
+        button.addEventListener('mouseleave', function() {
+            const icon = this.querySelector('i');
+            icon.classList.remove('animate-shake');
+        });
+    });
+    
+    // Add custom shake animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(-5deg); }
+            40% { transform: rotate(5deg); }
+            60% { transform: rotate(-5deg); }
+            80% { transform: rotate(5deg); }
+        }
+        .animate-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

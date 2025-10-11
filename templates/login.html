@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Register | CodeJourney</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Fira Code', monospace;
+            background-color: #0a0a12;
+            overflow-x: hidden;
+            overflow-y: auto; /* Enable vertical scrolling */
+            min-height: 100vh; /* Ensure body takes at least full viewport height */
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #6366f1, #8b5cf6);
+            opacity: 0.3;
+            z-index: 0;
+        }
+        
+        .code-journey-logo {
+            position: relative;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 8s ease infinite;
+            background-size: 200% 200%;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .form-container {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 0%,
+                rgba(99, 102, 241, 0.1) 30%,
+                rgba(139, 92, 246, 0.1) 50%,
+                rgba(236, 72, 153, 0.1) 70%,
+                transparent 100%
+            );
+            transform: rotate(45deg);
+            z-index: -1;
+            animation: shine 8s linear infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        
+        .input-field {
+            transition: all 0.3s ease;
+            background-color: rgba(42, 42, 63, 0.7);
+            backdrop-filter: blur(5px);
+        }
+        
+        .input-field:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+        }
+        
+        .toggle-form {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .toggle-form::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6, #ec4899);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        
+        .toggle-form:hover::before {
+            opacity: 0.1;
+        }
+        
+        .social-btn {
+            transition: all 0.3s ease;
+            background-color: rgba(31, 41, 55, 0.7);
+            backdrop-filter: blur(5px);
+        }
+        
+        .social-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px rgba(139, 92, 246, 0.8);
+        }
+        
+        .tab-button {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            border-radius: 3px;
+            animation: tabUnderline 0.3s ease-out;
+        }
+        
+        @keyframes tabUnderline {
+            0% { width: 0; opacity: 0; }
+            100% { width: 30px; opacity: 1; }
+        }
+        
+        .submit-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            z-index: 1;
+        }
+        
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.7s ease;
+            z-index: -1;
+        }
+        
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+        
+        .floating-code {
+            position: absolute;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.05);
+            font-family: 'Fira Code', monospace;
+            user-select: none;
+            z-index: 0;
+        }
+        
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid #8b5cf6;
+            white-space: nowrap;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #8b5cf6 }
+        }
+        ::-webkit-scrollbar {
+			width: 8px;
+		}
+		::-webkit-scrollbar-track {
+			background: #2a2a3a;
+		}
+		::-webkit-scrollbar-thumb {
+			background: #4f46e5;
+			border-radius: 4px;
+		}
+		::-webkit-scrollbar-thumb:hover {
+			background: #6366f1;
+		}
+    </style>
+</head>
+<body class="flex flex-col p-4 relative">
+    <!-- Floating code elements -->
+    <div class="floating-code" style="top: 10%; left: 5%;">function login() { ... }</div>
+    <div class="floating-code" style="top: 25%; right: 8%;">const user = new User();</div>
+    <div class="floating-code" style="bottom: 15%; left: 12%;">import React from 'react';</div>
+    <div class="floating-code" style="bottom: 30%; right: 5%;">.container { display: flex; }</div>
+    
+    <!-- Particle background -->
+    <div id="particles"></div>
+    
+    <div class="w-full max-w-md mx-auto relative z-10 my-8">
+        <!-- Logo and Title -->
+        <div class="text-center mb-8">
+            <div class="flex items-center justify-center mb-3">
+                <i class="fas fa-code text-5xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600 mr-3"></i>
+                <h1 class="code-journey-logo text-4xl font-bold"><a href="{{ url_for('home') }}">CodeJourney</a></h1>
+            </div>
+            <p class="text-gray-400 mb-2">Embark on your adventure</p>
+        </div>
+        
+        <!-- Form Container -->
+        <div class="bg-gray-900/80 rounded-xl p-8 form-container backdrop-blur-sm border border-gray-800/50">
+            <!-- Tabs -->
+            <div class="flex mb-6 border-b border-gray-800/50">
+                <button id="login-tab" class="tab-button active flex-1 py-3 text-white font-medium text-center">
+                    <span class="glow-text">Login</span>
+                </button>
+                <button id="register-tab" class="tab-button flex-1 py-3 text-gray-400 font-medium text-center">
+                    Register
+                </button>
+            </div>
+
+            {% for category, message in get_flashed_messages(with_categories=true) %}
+                <div class="mb-4 p-4 rounded-md border-l-4 
+                            {% if category == 'error' %} 
+                                bg-red-50 border-red-500 text-red-700 
+                            {% elif category == 'success' %} 
+                                bg-green-50 border-green-500 text-green-700 
+                            {% elif category == 'warning' %} 
+                                bg-yellow-50 border-yellow-500 text-yellow-700 
+                            {% else %} 
+                                bg-blue-50 border-blue-500 text-blue-700 
+                            {% endif %}">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            {% if category == 'error' %}
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                </svg>
+                            {% elif category == 'success' %}
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                            {% elif category == 'warning' %}
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                            {% else %}
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                </svg>
+                            {% endif %}
+                            <p>{{ message }}</p>
+                        </div>
+                        <button type="button" class="text-gray-500 hover:text-gray-700 focus:outline-none" onclick="this.parentElement.parentElement.remove()">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <!-- Login Form -->
+            <div id="login-form" class="space-y-5">
+                <form method="POST" action="{{ url_for('login') }}" class="space-y-5" autocomplete="off">
+                    <div>
+                        <label for="login-email" class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                        <div class="relative">
+                            <input name="email" required type="email" id="login-email" class="w-full px-4 py-3 rounded-lg input-field text-white focus:outline-none focus:ring-1 focus:ring-purple-500 border border-gray-800" placeholder="coder@example.com">
+                            <i class="fas fa-envelope absolute right-3 top-3.5 text-gray-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="login-password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                        <div class="relative">
+                            <input name="password" required type="password" id="login-password" class="w-full px-4 py-3 rounded-lg input-field text-white focus:outline-none focus:ring-1 focus:ring-purple-500 border border-gray-800" placeholder="••••••••">
+                            <i class="fas fa-lock absolute right-3 top-3.5 text-gray-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="remember-me" class="h-4 w-4 text-purple-600 focus:ring-purple-500 rounded border-gray-600 bg-gray-800">
+                            <label for="remember-me" class="ml-2 block text-sm text-gray-400">Remember me</label>
+                        </div>
+                        <a href="{{ url_for('forgot_password') }}" class="text-sm text-purple-400 hover:text-purple-300 transition-colors">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 submit-btn">
+                        <span class="relative z-10">Sign In</span>
+                    </button>
+                </form>
+
+                <div class="relative flex items-center py-4">
+                    <div class="flex-grow border-t border-gray-800/50"></div>
+                    <span class="flex-shrink mx-4 text-gray-500 text-sm">OR CONTINUE WITH</span>
+                    <div class="flex-grow border-t border-gray-800/50"></div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-3">
+                    <button class="social-btn bg-gray-800/50 text-white py-2.5 px-4 rounded-lg flex items-center justify-center hover:bg-gray-700/50 border border-gray-800/50">
+                        <i class="fab fa-github text-lg"></i>
+                    </button>
+                    <button class="social-btn bg-gray-800/50 text-white py-2.5 px-4 rounded-lg flex items-center justify-center hover:bg-gray-700/50 border border-gray-800/50">
+                        <i class="fab fa-google text-lg"></i>
+                    </button>
+                    <button class="social-btn bg-gray-800/50 text-white py-2.5 px-4 rounded-lg flex items-center justify-center hover:bg-gray-700/50 border border-gray-800/50">
+                        <i class="fab fa-facebook-f text-lg"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Register Form (Hidden by default) -->
+            <div id="register-form" class="space-y-5 hidden">
+                <form method="POST" action="{{ url_for('register') }}" class="space-y-5" autocomplete="off">
+                    <div>
+                        <label for="register-username" class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                        <div class="relative">
+                            <input name="username" required type="text" id="register-username" class="w-full px-4 py-3 rounded-lg input-field text-white focus:outline-none focus:ring-1 focus:ring-purple-500 border border-gray-800" placeholder="codeExplorer">
+                            <i class="fas fa-user absolute right-3 top-3.5 text-gray-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="register-email" class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                        <div class="relative">
+                            <input name="email" type="email" id="register-email" required class="w-full px-4 py-3 rounded-lg input-field text-white focus:outline-none focus:ring-1 focus:ring-purple-500 border border-gray-800" placeholder="coder@example.com">
+                            <i class="fas fa-envelope absolute right-3 top-3.5 text-gray-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="register-password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                        <div class="relative">
+                            <input name="password" type="password" required id="register-password" class="w-full px-4 py-3 rounded-lg input-field text-white focus:outline-none focus:ring-1 focus:ring-purple-500 border border-gray-800" placeholder="••••••••">
+                            <i class="fas fa-lock absolute right-3 top-3.5 text-gray-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="register-confirm-password" class="block text-sm font-medium text-gray-300 mb-1">Confirm Password</label>
+                        <div class="relative">
+                            <input name="confirmpassword" required type="password" id="register-confirm-password" class="w-full px-4 py-3 rounded-lg input-field text-white focus:outline-none focus:ring-1 focus:ring-purple-500 border border-gray-800" placeholder="••••••••">
+                            <i class="fas fa-lock absolute right-3 top-3.5 text-gray-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <input type="checkbox" id="accept-terms" required class="h-4 w-4 text-purple-600 focus:ring-purple-500 rounded mt-1 border-gray-600 bg-gray-800">
+                        <label for="accept-terms" class="ml-2 block text-sm text-gray-400">
+                            I agree to the 
+                            <a href="#" class="text-purple-400 hover:text-purple-300 transition-colors" onclick="openModal('terms-modal')">Terms</a> 
+                            and 
+                            <a href="#" class="text-purple-400 hover:text-purple-300 transition-colors" onclick="openModal('privacy-modal')">Privacy Policy</a>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 submit-btn">
+                        <span class="relative z-10">Create Account</span>
+                    </button>
+                </form>
+                
+                <div class="relative flex items-center py-4">
+                    <div class="flex-grow border-t border-gray-800/50"></div>
+                    <span class="flex-shrink mx-4 text-gray-500 text-sm">OR SIGN UP WITH</span>
+                    <div class="flex-grow border-t border-gray-800/50"></div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-3">
+                    <button class="social-btn bg-gray-800/50 text-white py-2.5 px-4 rounded-lg flex items-center justify-center hover:bg-gray-700/50 border border-gray-800/50">
+                        <i class="fab fa-github text-lg"></i>
+                    </button>
+                    <button class="social-btn bg-gray-800/50 text-white py-2.5 px-4 rounded-lg flex items-center justify-center hover:bg-gray-700/50 border border-gray-800/50">
+                        <i class="fab fa-google text-lg"></i>
+                    </button>
+                    <button class="social-btn bg-gray-800/50 text-white py-2.5 px-4 rounded-lg flex items-center justify-center hover:bg-gray-700/50 border border-gray-800/50">
+                        <i class="fab fa-facebook-f text-lg"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mt-6 text-center text-sm text-gray-500">
+                <span id="toggle-text">Don't have an account? </span>
+                <button id="toggle-form" class="text-purple-400 hover:text-purple-300 font-medium toggle-form transition-colors">Sign up</button>
+            </div>
+        </div>
+        
+        <div class="mt-6 text-center text-xs text-gray-600">
+            © 2025 CodeJourney. All rights reserved.
+        </div>
+
+        <div id="terms-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50">
+            <div class="bg-gray-900/80 rounded-xl p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto border border-gray-800/50 form-container">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-white">Điều khoản Dịch vụ</h2>
+                    <button onclick="closeModal('terms-modal')" class="text-gray-400 hover:text-gray-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="text-gray-300 text-sm space-y-4">
+                    <p><strong>1. Chấp nhận Điều khoản</strong></p>
+                    <p>Khi sử dụng trang web CodeJourney, bạn đồng ý tuân thủ các Điều khoản Dịch vụ này. Nếu không đồng ý, vui lòng không sử dụng dịch vụ của chúng tôi.</p>
+                    <p><strong>2. Trách nhiệm của Người dùng</strong></p>
+                    <p>Người dùng chịu trách nhiệm bảo mật thông tin tài khoản và mọi hoạt động diễn ra dưới tài khoản của mình.</p>
+                    <p><strong>3. Sử dụng Nội dung</strong></p>
+                    <p>Tất cả nội dung trên trang web này chỉ phục vụ mục đích giáo dục. Việc sao chép hoặc phân phối trái phép là bị cấm.</p>
+                    <p><strong>4. Sửa đổi</strong></p>
+                    <p>Chúng tôi có quyền sửa đổi các điều khoản này bất kỳ lúc nào. Các thay đổi sẽ có hiệu lực ngay khi được đăng trên trang web.</p>
+                    <!-- <p><em>(Đây là nội dung mẫu. Vui lòng thay bằng Điều khoản Dịch vụ thực tế của bạn.)</em></p> -->
+                </div>
+            </div>
+        </div>
+
+        <div id="privacy-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50">
+            <div class="bg-gray-900/80 rounded-xl p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto border border-gray-800/50 form-container">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-white">Chính sách Bảo mật</h2>
+                    <button onclick="closeModal('privacy-modal')" class="text-gray-400 hover:text-gray-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="text-gray-300 text-sm space-y-4">
+                    <p><strong>1. Thu thập Thông tin</strong></p>
+                    <p>Chúng tôi thu thập thông tin cá nhân như email và tên người dùng để cung cấp và cải thiện dịch vụ của mình.</p>
+                    <p><strong>2. Sử dụng Dữ liệu</strong></p>
+                    <p>Thông tin của bạn được sử dụng để cá nhân hóa trải nghiệm và thông báo cập nhật. Chúng tôi không chia sẻ dữ liệu của bạn với bên thứ ba mà không có sự đồng ý.</p>
+                    <p><strong>3. Bảo mật Dữ liệu</strong></p>
+                    <p>Chúng tôi áp dụng các biện pháp để bảo vệ dữ liệu của bạn, nhưng không hệ thống nào hoàn toàn an toàn. Người dùng chịu rủi ro về vi phạm dữ liệu.</p>
+                    <p><strong>4. Cookies</strong></p>
+                    <p>Trang web của chúng tôi sử dụng cookies để nâng cao trải nghiệm người dùng. Bạn có thể tắt cookies trong cài đặt trình duyệt.</p>
+                    <!-- <p><em>(Đây là nội dung mẫu. Vui lòng thay bằng Chính sách Bảo mật thực tế của bạn.)</em></p> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginTab = document.getElementById('login-tab');
+            const registerTab = document.getElementById('register-tab');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const toggleForm = document.getElementById('toggle-form');
+            const toggleText = document.getElementById('toggle-text');
+            
+            // Create particles
+            function createParticles() {
+                const particlesContainer = document.getElementById('particles');
+                const particleCount = window.innerWidth < 768 ? 20 : 40;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    
+                    // Random size between 2px and 6px
+                    const size = Math.random() * 4 + 2;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    
+                    // Random position
+                    particle.style.top = `${Math.random() * 100}%`;
+                    particle.style.left = `${Math.random() * 100}%`;
+                    
+                    // Random animation
+                    const duration = Math.random() * 20 + 10;
+                    const delay = Math.random() * 5;
+                    particle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite alternate`;
+                    
+                    // Add floating animation
+                    const keyframes = `
+                        @keyframes float {
+                            0% { transform: translate(0, 0) rotate(0deg); opacity: ${Math.random() * 0.3 + 0.1}; }
+                            50% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg); opacity: ${Math.random() * 0.5 + 0.3}; }
+                            100% { transform: translate(0, 0) rotate(0deg); opacity: ${Math.random() * 0.3 + 0.1}; }
+                        }
+                    `;
+                    
+                    const style = document.createElement('style');
+                    style.innerHTML = keyframes;
+                    document.head.appendChild(style);
+                    
+                    particlesContainer.appendChild(particle);
+                }
+            }
+            
+            // Toggle between login and register forms
+            function toggleForms(showLogin) {
+                if (showLogin) {
+                    // Switch to login
+                    loginForm.classList.remove('hidden');
+                    registerForm.classList.add('hidden');
+                    loginTab.classList.add('active', 'text-white');
+                    loginTab.classList.remove('text-gray-400');
+                    registerTab.classList.remove('active', 'text-white');
+                    registerTab.classList.add('text-gray-400');
+                    toggleText.textContent = "Don't have an account? ";
+                    toggleForm.textContent = "Sign up";
+                } else {
+                    // Switch to register
+                    loginForm.classList.add('hidden');
+                    registerForm.classList.remove('hidden');
+                    loginTab.classList.remove('active', 'text-white');
+                    loginTab.classList.add('text-gray-400');
+                    registerTab.classList.add('active', 'text-white');
+                    registerTab.classList.remove('text-gray-400');
+                    toggleText.textContent = "Already have an account? ";
+                    toggleForm.textContent = "Sign in";
+                }
+                updateGlowEffect();
+            }
+            
+            // Add glow effect to active tab text
+            function updateGlowEffect() {
+                if (loginTab.classList.contains('active')) {
+                    loginTab.querySelector('span').classList.add('glow-text');
+                    if (registerTab.querySelector('span')) {
+                        registerTab.querySelector('span').classList.remove('glow-text');
+                    }
+                } else {
+                    if (registerTab.querySelector('span')) {
+                        registerTab.querySelector('span').classList.add('glow-text');
+                    }
+                    loginTab.querySelector('span').classList.remove('glow-text');
+                }
+            }
+            
+            // Initialize based on active_tab
+            const activeTab = "{{ active_tab|default('login') }}";
+            toggleForms(activeTab === 'login');
+            
+            // Create particles
+            createParticles();
+            
+            // Event listeners
+            toggleForm.addEventListener('click', () => toggleForms(loginForm.classList.contains('hidden')));
+            loginTab.addEventListener('click', () => toggleForms(true));
+            registerTab.addEventListener('click', () => toggleForms(false));
+        });
+    </script>
+    <script>
+        // Thêm vào hàm hiện có trong login.html
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Đóng modal khi nhấp bên ngoài
+        document.querySelectorAll('#terms-modal, #privacy-modal').forEach(modal => {
+            modal.addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeModal(this.id);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

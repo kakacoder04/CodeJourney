@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Làm Bài | CodeJourney {% endblock %}
+
+{% block link %}
+{% endblock %}
+
+{% block content %}
+<div class=" mx-auto px-4 py-8 max-w-6xl">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Question Pane -->
+            <div class="w-full lg:w-2/3 bg-[#2a2a3f] rounded-xl shadow-lg overflow-hidden">
+                <div class="p-4 bg-[#3f3f62] flex items-center justify-between">
+                    <h3 class="text-xl font-bold flex items-center">
+                        <i class="fas fa-question-circle mr-2 text-indigo-400"></i>
+                        Câu hỏi
+                    </h3>
+                    <a href="/organization" class="flex items-center space-x-3">
+                        <div class="w-3 h-8 rounded-full bg-purple-500"></div>
+                        <div class="w-3 h-8 rounded-full bg-blue-500 opacity-70"></div>
+                        <div class="w-3 h-8 rounded-full bg-indigo-500 opacity-50"></div>
+                    </a>
+                </div>
+                <div class="p-4 pdf-container">
+                    <embed src="{{ exam.file_path }}" width="100%" height="600px" type="application/pdf">
+                </div>
+            </div>
+            
+            <!-- Answer Pane -->
+            <div class="w-full lg:w-1/3 bg-[#2a2a3f] rounded-xl shadow-lg overflow-hidden">
+                <div class="p-4 bg-[#3f3f62]">
+                    <h3 class="text-xl font-bold flex items-center">
+                        <i class="fas fa-edit mr-2 text-indigo-400"></i>
+                        Bài làm
+                    </h3>
+                </div>
+                
+                <form class="p-4" action="/submit_assignment/{{ exam.id }}" method="POST">
+                    <div class="section-content">
+                        <label class="block mb-2 font-medium">Câu trả lời Phần I</label>
+                        <textarea name="answer" 
+                                  class="answer-textarea w-full p-8 bg-[#3f3f62] border border-[#4a4a6a] rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                  placeholder="Nhập câu trả lời phần I..."></textarea>
+                    </div>
+                    
+                    <div class="section-content">
+                        <label class="block mb-2 font-medium">Câu trả lời Phần II</label>
+                        <textarea name="answer" 
+                                  class="answer-textarea w-full p-8 bg-[#3f3f62] border border-[#4a4a6a] rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                  placeholder="Nhập câu trả lời phần II..."></textarea>
+                    </div>
+                    
+                    <div class="section-content">
+                        <label class="block mb-2 font-medium">Câu trả lời Phần III</label>
+                        <textarea name="answer" 
+                                  class="answer-textarea w-full p-8 bg-[#3f3f62] border border-[#4a4a6a] rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                  placeholder="Nhập câu trả lời phần III..."></textarea>
+                    </div>
+        
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" 
+                                class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md font-medium transition-colors flex items-center">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Nộp bài
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Timer -->
+        <div class="fixed top-6 right-6 bg-[#3f3f62] p-3 rounded-full shadow-xl flex items-center">
+            <i class="fas fa-clock text-indigo-400 mr-2"></i>
+            <span class="countdown" data-end-time="{{ exam.end_time }}">--:--:--</span>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const countdownElements = document.querySelectorAll(".countdown");
+
+        countdownElements.forEach((element) => {
+            const endTime = new Date(element.getAttribute("data-end-time"));
+
+            const updateCountdown = () => {
+                const now = new Date();
+                const diff = endTime - now;
+
+                if (diff <= 0) {
+                    element.innerHTML = "Đã kết thúc";
+                    const joinButton = element.closest(".exam-card").querySelector(".join-btn");
+                    if (joinButton) {
+                        joinButton.disabled = true;
+                        joinButton.classList.remove("bg-accent", "hover:bg-accent/90");
+                        joinButton.classList.add("bg-gray-500", "cursor-not-allowed");
+                    }
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                if (days > 0) {
+                    element.innerHTML = `${days}:${hours}:${minutes}:${seconds}`;
+                } else if (hours > 0) {
+                    element.innerHTML = `${hours}:${minutes}:${seconds}`;
+                } else {
+                    element.innerHTML = `0:${minutes}:${seconds}`;
+                }
+            };
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        });
+    });
+</script>
+{% endblock %}

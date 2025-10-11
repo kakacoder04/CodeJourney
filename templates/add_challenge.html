@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}Thêm Thử Thách | CodeJourney{% endblock %}
+
+{% block link %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e1e2f',
+                        secondary: '#2a2a3a',
+                        accent: '#4f46e5',
+                        tealAccent: '#4fd1c5'
+                    } 
+                }
+            }
+        }
+    </script>
+    <style>
+        .testcase {
+            transition: all 0.3s ease;
+        }
+        .testcase:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .custom-upload:hover {
+            background-color: #4f46e5;
+        }
+        .challenge-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-primary text-gray-200 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto max-w-6xl">
+        <!-- Tiêu đề -->
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-indigo-400">Quản lý Thử Thách</h1>
+            <a href="{{ url_for('admin') }}" class="flex items-center space-x-3">
+                <div class="w-3 h-8 rounded-full bg-purple-500"></div>
+                <div class="w-3 h-8 rounded-full bg-blue-500 opacity-70"></div>
+                <div class="w-3 h-8 rounded-full bg-indigo-500 opacity-50"></div>
+            </a>
+        </div>
+
+        <!-- Form Thêm Thử Thách -->
+        <form method="POST" action="{{ url_for('add_challenge') }}" class="bg-secondary p-6 rounded-2xl shadow-lg mb-12 border border-gray-700" enctype="multipart/form-data">
+            <div class="space-y-6">
+                <!-- Đề bài -->
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-300 mb-1">Đề bài</label>
+                    <textarea id="description" name="description" rows="5" class="w-full bg-[#1e1e2f] border border-gray-600 rounded-lg p-3 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-500" placeholder="Nhập đề bài thử thách..." required></textarea>
+                </div>
+
+                <!-- Độ khó -->
+                <div>
+                    <label for="difficulty" class="block text-sm font-medium text-gray-300 mb-1">Độ khó</label>
+                    <select id="difficulty" name="difficulty" class="w-full bg-[#1e1e2f] border border-gray-600 rounded-lg p-3 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        <option value="" disabled selected class="text-gray-500">Chọn độ khó</option>
+                        <option value="beginner" class="text-green-400">Sơ cấp</option>
+                        <option value="intermediate" class="text-yellow-400">Trung cấp</option>
+                        <option value="advanced" class="text-red-400">Nâng cao</option>
+                    </select>
+                </div>
+
+                <!-- Dạng bài -->
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-300 mb-1">Dạng bài</label>
+                    <select id="category" name="category" class="w-full bg-[#1e1e2f] border border-gray-600 rounded-lg p-3 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="" class="text-gray-500">Không chọn</option>
+                        {% for category in categories %}
+                        <option value="{{ category }}" class="text-indigo-300">{{ category | capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Test Cases -->
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-300">Test Cases Mẫu</h3>
+                        <span id="testcase-count" class="text-sm text-gray-400">1 test case</span>
+                    </div>
+                    <div id="testcases-container" class="space-y-4">
+                        <div class="testcase bg-[#1e1e2f] p-5 rounded-xl border border-gray-700">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Input</label>
+                                    <textarea name="inputs[]" rows="3" class="w-full bg-[#2a2a3a] border border-gray-600 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-500" placeholder="Dữ liệu đầu vào..." required></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Output</label>
+                                    <textarea name="outputs[]" rows="3" class="w-full bg-[#2a2a3a] border border-gray-600 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-500" placeholder="Kết quả đầu ra..." required></textarea>
+                                </div>
+                            </div>
+                            <input type="hidden" name="sources[]" value="manual">
+                            <button type="button" class="remove-testcase mt-3 bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm flex items-center transition-colors">
+                                <i class="fas fa-trash mr-1"></i> Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Folder -->
+                <div>
+                    <label for="testcase_folder" class="block text-sm font-medium text-gray-300 mb-1">Upload Folder Test Case</label>
+                    <div class="flex items-center space-x-3">
+                        <input type="file" id="testcase_folder" name="testcase_folder" webkitdirectory directory multiple class="hidden">
+                        <label for="testcase_folder" class="custom-upload bg-indigo-600 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-indigo-700 text-sm flex items-center transition-colors">
+                            <i class="fas fa-folder-open mr-2"></i> Chọn Thư Mục
+                        </label>
+                        <p id="folder-name" class="folder-name text-sm text-gray-300"></p>
+                    </div>
+                </div>
+
+                <!-- Nút điều khiển -->
+                <div class="flex flex-wrap gap-3">
+                    <button type="button" id="add-testcase" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm flex items-center transition-colors">
+                        <i class="fas fa-plus mr-2"></i> Thêm Test Case
+                    </button>
+                    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-sm flex items-center transition-colors">
+                        <i class="fas fa-save mr-2"></i> Thêm Thử Thách
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Danh sách Thử Thách -->
+        <h2 class="text-2xl font-bold text-indigo-400 mb-6">Danh sách Thử Thách</h2>
+        {% if challenges %}
+        <div class="challenge-list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for challenge in challenges %}
+            <div class="challenge-item bg-secondary p-5 rounded-xl shadow-md flex flex-col justify-between transition-all border border-gray-700">
+                <div class="flex items-center mb-3">
+                    <img src="{{ url_for('static', filename='icons/cup.svg') }}" alt="Trophy" class="w-8 h-8 mr-3">
+                    <div>
+                        <p class="text-gray-200 font-medium text-sm truncate" title="{{ challenge.description | safe }}">{{ challenge.description[:25] | safe }}...</p>
+                        <p class="text-xs text-gray-400">
+                            Độ khó:
+                            <span class="{% if challenge.difficulty == 'beginner' %}text-green-400{% elif challenge.difficulty == 'intermediate' %}text-yellow-400{% else %}text-red-400{% endif %}">
+                                {{ {'beginner': 'Sơ cấp', 'intermediate': 'Trung cấp', 'advanced': 'Nâng cao'}[challenge.difficulty] }}
+                            </span>
+                        </p>
+                        {% if challenge.category %}
+                        <p class="text-xs text-gray-400">Dạng bài: <span class="text-indigo-400">{{ challenge.category | capitalize }}</span></p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="challenge-actions flex space-x-2">
+                    <form action="{{ url_for('edit_challenge', id=challenge.id) }}" method="GET">
+                        <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 text-sm flex items-center transition-colors">
+                            <i class="fas fa-edit mr-1"></i> Sửa
+                        </button>
+                    </form>
+                    <form action="{{ url_for('delete_challenge', id=challenge.id) }}" method="POST">
+                        <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm flex items-center transition-colors">
+                            <i class="fas fa-trash mr-1"></i> Xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center text-gray-400">
+            <p>Chưa có thử thách nào!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Thêm Test Case
+    document.getElementById('add-testcase').addEventListener('click', function() {
+        const container = document.getElementById('testcases-container');
+        const testcaseCount = document.querySelectorAll('.testcase').length + 1;
+        const newTestcase = document.createElement('div');
+        newTestcase.className = 'testcase bg-[#1e1e2f] p-5 rounded-xl border border-gray-700';
+        newTestcase.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Input</label>
+                    <textarea name="inputs[]" rows="3" class="w-full bg-[#2a2a3a] border border-gray-600 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-500" placeholder="Dữ liệu đầu vào..." required></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Output</label>
+                    <textarea name="outputs[]" rows="3" class="w-full bg-[#2a2a3a] border border-gray-600 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-500" placeholder="Kết quả đầu ra..." required></textarea>
+                </div>
+            </div>
+            <input type="hidden" name="sources[]" value="manual">
+            <button type="button" class="remove-testcase mt-3 bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm flex items-center transition-colors">
+                <i class="fas fa-trash mr-1"></i> Xóa
+            </button>
+        `;
+        container.appendChild(newTestcase);
+        document.getElementById('testcase-count').textContent = `${testcaseCount} test case${testcaseCount !== 1 ? 's' : ''}`;
+        newTestcase.querySelector('.remove-testcase').addEventListener('click', function() {
+            this.closest('.testcase').remove();
+            updateTestcaseCount();
+        });
+    });
+
+    // Xóa Test Case
+    document.getElementById('testcases-container').addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-testcase') || e.target.closest('.remove-testcase')) {
+            e.target.closest('.testcase').remove();
+            updateTestcaseCount();
+        }
+    });
+
+    // Cập nhật số lượng test case
+    function updateTestcaseCount() {
+        const count = document.querySelectorAll('.testcase').length;
+        document.getElementById('testcase-count').textContent = `${count} test case${count !== 1 ? 's' : ''}`;
+    }
+
+    // Hiển thị tên thư mục test case
+    document.getElementById('testcase_folder').addEventListener('change', function(e) {
+        const folderName = document.getElementById('folder-name');
+        if (this.files.length > 0) {
+            const path = this.files[0].webkitRelativePath;
+            const folder = path.split('/')[0];
+            folderName.textContent = `Đã chọn: ${folder} (${this.files.length} files)`;
+        } else {
+            folderName.textContent = '';
+        }
+    });
+
+    // Hiệu ứng click thử thách
+    document.querySelectorAll('.challenge-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            if (!e.target.closest('.challenge-actions')) {
+                console.log('Challenge clicked:', this.querySelector('p').textContent);
+            }
+        });
+    });
+</script>
+{% endblock %}

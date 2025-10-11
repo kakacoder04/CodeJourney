@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Bài Học | CodeJourney{% endblock %}
+
+{% block link %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e1e2f',
+                        secondary: '#2d2d42',
+                        accent: '#4f46e5',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-image {
+            height: 160px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .card:hover .card-image {
+            transform: scale(1.05);
+        }
+        .completed-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 10;
+            background: rgba(16, 185, 129, 0.9);
+            backdrop-filter: blur(4px);
+        }
+        .gradient-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            transition: all 0.3s ease;
+        }
+        .gradient-btn:hover {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+        .search-input {
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+        }
+        .mobilex {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile {
+                display: none !important;
+            }
+            .mobilex {
+                display: flex !important;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center mb-12">
+        <h2 class="mobile text-4xl font-bold text-white sm:text-5xl mb-4">
+            Danh Sách Bài Học
+        </h2> 
+        <h2 class="mobilex text-3xl font-bold text-white sm:text-5xl mb-4"> 
+            Danh Sách Bài Học
+        </h2> 
+        <p class="text-xl text-indigo-300 font-medium">
+            Học tập và phát triển kỹ năng
+        </p>
+        <div class="mt-6 max-w-md mx-auto">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    id="lesson-search" 
+                    placeholder="Tìm kiếm bài học..." 
+                    class="search-input w-full px-4 py-3 rounded-lg bg-secondary text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
+                >
+                <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+    </div>
+
+    <div id="lessons-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        {% for lesson in lessons %}
+        <div class="card bg-secondary rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-700 group relative" data-title="{{ lesson.title | lower }}" data-content="{{ lesson.content | default('') | lower }}">
+            <div class="overflow-hidden">
+                <img src="{{ url_for('static', filename='images/learn.png') }}" alt="kakadepzai" class="w-full card-image">
+            </div>
+
+            {% if lesson.id in completed_lesson_ids %}
+            <div class="completed-badge flex items-center justify-center w-10 h-10 rounded-full">
+                <i class="fas fa-check text-white"></i>
+            </div>
+            {% endif %}
+
+            <div class="p-6">
+                <div class="flex items-start mb-4">
+                    <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-md bg-indigo-900/50 text-indigo-300 mr-4">
+                        <i class="{{ lesson.icon | default('fas fa-laptop-code') }} text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white line-clamp-2">{{ lesson.title }}</h3>
+                </div>
+
+                <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                    {{ lesson.content | default('Mô tả bài học không có sẵn.') }}
+                </p>
+
+                <div class="mt-6">
+                    <a href="{{ url_for('lesson_detail', id=lesson.id) }}" class="gradient-btn w-full flex items-center justify-center px-4 py-3 rounded-md text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Xem chi tiết
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('lesson-search');
+    const lessons = document.querySelectorAll('#lessons-container .card');
+
+    searchInput.addEventListener('input', () => {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+
+        lessons.forEach(lesson => {
+            const title = lesson.dataset.title;
+            const content = lesson.dataset.content;
+            const matches = title.includes(searchTerm) || content.includes(searchTerm);
+            lesson.style.display = matches ? '' : 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

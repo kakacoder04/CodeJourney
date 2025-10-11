@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} | CodeJourney {% endblock %}
+
+{% block link %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .organization-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .organization-card {
+            transition: all 0.3s ease;
+        }
+        .glow-text {
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class=" mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header with back button -->
+        <div class="flex items-center justify-between mb-8">
+            <a href="{{ url_for('organization')}}" class="flex items-center text-indigo-300 hover:text-indigo-100 transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-2"></i>
+                <span class="font-medium">Quay lại</span>
+            </a>
+            <h1 class="text-3xl font-bold text-center glow-text">{{ title }}</h1>
+            <div class="w-8"></div> <!-- Spacer for balance -->
+        </div>
+
+        <!-- Search and filter section -->
+        <div class="mb-8 flex justify-end"> <!-- Thêm justify-end để căn phải -->
+            <div class="relative w-full md:w-96">
+                <input type="text" placeholder="Tìm kiếm tổ chức..." 
+                    class="w-full bg-[#2a2a3f] border border-[#3d3d5c] rounded-lg py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Organization cards grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {% for org in organizations %}
+                <div class="organization-card bg-[#2a2a3f] rounded-xl overflow-hidden border border-[#3d3d5c] hover:border-indigo-500">
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-16 h-16 rounded-full bg-[#2a2b3d] border-2 border-dashed border-[#3a3b4d] flex items-center justify-center overflow-hidden">
+                                {% if org.image_path %}
+                                    <img class="avatar-preview w-full h-full object-cover" 
+                                         src="{{ url_for('static', filename=org.image_path) }}" 
+                                         alt="{{ org.name }} Avatar" 
+                                         onload="this.classList.remove('hidden'); this.classList.add('block'); this.parentElement.querySelector('.avatar-icon').classList.add('hidden');"
+                                         onerror="this.classList.add('hidden'); this.parentElement.querySelector('.avatar-icon').classList.remove('hidden');">
+                                {% endif %}
+                                <i class="avatar-icon fas fa-camera text-gray-500"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-white">{{ org.name }}</h3>
+                        </div>
+                        <p class="text-gray-400 mb-4">{{ org.description|default('Mô tả ngắn về tổ chức này sẽ hiển thị ở đây, giới hạn khoảng 2 dòng.') }}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-indigo-300">{{ org.member_count|default(0) }} thành viên</span>
+                            <a href="{{ url_for('organization_detail', organization_id=org.id) }}" class="text-indigo-400 hover:text-indigo-300 transition-colors duration-200">
+                                Xem chi tiết <i class="fas fa-chevron-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            {% if not organizations %}
+            <div class="glass-effect rounded-xl p-12 text-center mt-8 organization-card bg-[#2a2a3f] border-2 border-dashed border-[#3d3d5c] hover:border-indigo-500">
+                <i class="fas fa-building text-5xl text-gray-500 mb-4"></i>
+                <h3 class="text-xl font-medium text-gray-300">Không có tổ chức nào</h3>
+                <p class="text-gray-500 mt-2 mb-4">Bạn chưa tham gia hoặc tạo tổ chức nào</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Simple search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[type="text"]');
+            const organizationCards = document.querySelectorAll('.organization-card');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                organizationCards.forEach(card => {
+                    const title = card.querySelector('h3') ? card.querySelector('h3').textContent.toLowerCase() : '';
+                    const description = card.querySelector('p') ? card.querySelector('p').textContent.toLowerCase() : '';
+                    
+                    if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else if (!card.querySelector('button')) { // Exclude the "Add new" card
+                        card.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Add animation to cards on hover
+            organizationCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+{% endblock %}

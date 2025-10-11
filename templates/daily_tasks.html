@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block title %}Nhiệm Vụ | CodeJourney{% endblock %}
+{% block link %}
+<style>
+        /* Custom styles that can't be done with Tailwind */
+        progress::-webkit-progress-bar {
+            background-color: #787878;
+            border-radius: 20px;
+        }
+
+        progress::-webkit-progress-value {
+            background-color: #4ade80;
+            border-radius: 20px;
+        }
+
+        progress::-moz-progress-bar {
+            background-color: #4ade80;
+            border-radius: 20px;
+        }
+
+        .reward-icon.highlight {
+            animation: softGlow 2s infinite alternate;
+            filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6))
+                    drop-shadow(0 0 12px rgba(255, 215, 0, 0.4));
+        }
+
+        @keyframes softGlow {
+            0% {
+                filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.4))
+                        drop-shadow(0 0 8px rgba(255, 215, 0, 0.2));
+            }
+            100% {
+                filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8))
+                        drop-shadow(0 0 20px rgba(255, 215, 0, 0.6));
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffd700;
+            background-color: #2c3e50;
+            padding: 20px 50px;
+            font-weight: bold;
+            font-size: 1.5em;
+            border: 3px solid #f39c12;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            animation: bounceIn 0.6s ease-out;
+        }
+
+        .notification.hide {
+            opacity: 0;
+            transform: translate(-50%, -60%);
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: translate(-50%, -70%);
+                opacity: 0;
+            }
+            60% {
+                transform: translate(-50%, -52%);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .reward.fade-out {
+            animation: fadeOut 0.5s forwards;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+        }
+
+        .reward-icon.locked {
+            filter: grayscale(100%);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Custom scrollbar for rewards container */
+        .rewards-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .rewards-container::-webkit-scrollbar-thumb {
+            background-color: #475569;
+            border-radius: 8px;
+        }
+
+        .rewards-container::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+        .reward-icon[data-completed="true"] {
+            box-shadow: none;
+            pointer-events: none; 
+            cursor: default;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        
+
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Tasks Container -->
+            <div class="w-full lg:w-2/3 bg-gray-800 rounded-xl shadow-lg p-6">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-2xl md:text-3xl font-bold text-blue-400">Nhiệm Vụ Hằng Ngày</h1>
+                    <div class="flex items-center space-x-2">
+                        <!-- <i class="far fa-clock text-yellow-400 text-xl"></i> -->
+                        <img src="/static/icons/clock.svg" alt="Clock Icon" class="clock-icon">
+                        <span id="countdown" class="text-yellow-400 font-medium"></span>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    {% for task_key, task in tasks.items() %}
+                    <div class="flex items-center justify-between bg-gray-700 hover:bg-gray-600 transition-colors duration-300 p-4 rounded-lg" id="task-{{ task_key }}">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 flex items-center justify-center">
+                                <img src="/static/icons/quest.svg" alt="Quest Icon" class="w-full h-auto">
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-medium text-lg">{{ task.title }}</h3>
+                                <progress 
+                                    id="progress-{{ task_key }}" 
+                                    value="{{ task.current }}" 
+                                    max="{{ task.total }}" 
+                                    class="w-full h-2 mt-2"
+                                ></progress>
+                            </div>
+                        </div>
+                        <img 
+                            src="{% if task.completed %}/static/icons/complete.svg{% else %}/static/icons/cheat.svg{% endif %}" 
+                            alt="Task Icon" 
+                            class="reward-icon w-12 h-12"
+                            data-task-key="{{ task_key }}"
+                            {% if task.completed %}data-completed="true" style="cursor: default;"{% endif %}
+                        >
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-6 text-center text-gray-300">
+                    <p>Số nhiệm vụ đã hoàn thành: <span id="tasks-completed-counter" class="font-bold text-yellow-400">{{ user.tasks_completed }}</span></p>
+                </div>
+            </div>
+
+            <!-- Rewards Container -->
+            <div class="w-full lg:w-1/3 bg-gray-800 rounded-xl shadow-lg p-6 h-[calc(100vh-200px)] overflow-y-auto">
+                <h2 class="text-xl md:text-2xl font-bold text-blue-400 mb-6">Phần Thưởng Nhiệm Vụ</h2>
+                
+                {% if rewards.items() %}
+                    <div class="space-y-4">
+                        {% for reward_key, reward in rewards.items() %}
+                        <div class="flex items-center bg-gray-700 hover:bg-gray-600 transition-colors duration-300 p-3 rounded-lg" id="reward-{{ reward_key }}">
+                            <div class="reward-icon w-12 h-12 mr-3 flex-shrink-0 
+                                {% if user.tasks_completed >= reward.tasks_required and reward.title not in user.achievements %}highlight{% endif %}"
+                                data-reward-key="{{ reward_key }}"
+                                {% if reward.title in user.achievements %}style="cursor: default;"{% endif %}>
+                                {% if user.tasks_completed >= reward.tasks_required and reward.title not in user.achievements %}
+                                    <img src="/static/icons/rank/{{ reward_key }}.png" alt="{{ reward.title }}" class="w-full h-auto">
+                                {% else %}
+                                    <img src="/static/icons/rank/norank.svg" alt="{{ reward.title }}" class="w-full h-auto">
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h3 class="font-medium">{{ reward.title }}</h3>
+                                <p class="text-sm text-gray-400">Yêu cầu: {{ reward.tasks_required }} nhiệm vụ</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="flex items-center bg-gray-700 p-3 rounded-lg">
+                        <div class="w-12 h-12 mr-3">
+                            <img src="/static/icons/vp19.svg" alt="Coming soon" class="w-full h-auto">
+                        </div>
+                        <div>
+                            <h3 class="font-medium">Chưa có bậc Rank tiếp theo!</h3>
+                            <p class="text-sm text-gray-400 italic">Comingsoon...</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+<script src="{{ url_for('static', filename='js/daily_tasks.js') }}"></script>
+<script>
+    document.querySelectorAll('.reward-icon').forEach(icon => {
+        const rewardKey = icon.getAttribute('data-reward-key');
+
+        if (icon.classList.contains('highlight')) {
+            icon.addEventListener('click', function () {
+                fetch('/claim_reward', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reward_key: rewardKey })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification(data.success); // Hiển thị thông báo
+                        icon.parentElement.classList.add('fade-out'); // Thêm hiệu ứng biến mất
+
+                        // Xóa phần tử sau khi hiệu ứng hoàn thành
+                        setTimeout(() => {
+                            icon.parentElement.remove();
+                        }, 500); // Phải khớp với thời gian hiệu ứng CSS (0.5s)
+                    } else {
+                        alert(data.error || 'Có lỗi xảy ra!');
+                    }
+                })
+                .catch(error => console.error('Lỗi:', error));
+            });
+        }
+    });
+
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.innerText = message;
+
+        document.body.appendChild(notification);
+
+        // Sau 2 giây, thêm lớp 'hide' để tạo hiệu ứng biến mất
+        setTimeout(() => {
+            notification.classList.add('hide');
+            setTimeout(() => notification.remove(), 500); // Xóa thông báo sau khi hiệu ứng hoàn tất
+        }, 2000);
+    }
+
+    document.querySelectorAll('.reward-icon').forEach(icon => {
+        const taskKey = icon.getAttribute('data-task-key');
+        const progress = document.getElementById(`progress-${taskKey}`);
+
+        // Kiểm tra nếu progress đầy
+        if (progress.value >= progress.max && !icon.dataset.completed) {
+            icon.classList.add('highlight'); // Thêm hiệu ứng nếu chưa hoàn thành
+        }
+
+        // Gắn sự kiện click để xử lý
+        icon.addEventListener('click', function () {
+            if (progress.value >= progress.max && !icon.dataset.completed) {
+                fetch(`/complete_task_ajax/${taskKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.src = "/static/icons/complete.svg"; // Đổi thành complete.svg
+                        this.dataset.completed = "true"; // Gắn trạng thái hoàn thành
+                        this.style.cursor = "default";
+                        this.classList.remove('highlight'); // Loại bỏ hiệu ứng bóng vàng
+                        document.getElementById('tasks-completed-counter').innerText = data.tasks_completed;
+                    } else {
+                        alert(data.error || 'Có lỗi xảy ra!');
+                    }
+                })
+                .catch(error => console.error('Lỗi:', error));
+            }
+        });
+
+        // Loại bỏ bóng vàng nếu đã hoàn thành
+        if (icon.dataset.completed === "true") {
+            icon.classList.remove('highlight'); // Đảm bảo không có bóng vàng
+        }
+    });
+
+</script>
+{% endblock %}

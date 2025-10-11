@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Danh sách kỳ thi | CodeJourney{% endblock %}
+
+{% block link %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script> 
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e1e2f',
+                        secondary: '#2a2a3a',
+                        accent: '#4f46e5',
+                        text: '#e2e8f0',
+                        muted: '#94a3b8'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .exam-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .exam-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+        }
+        .join-btn {
+            transition: all 0.2s ease;
+        }
+        .join-btn:hover {
+            transform: scale(1.05);
+        }
+        .countdown {
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class=" mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div class="flex items-center gap-4">
+            <a href="{{ url_for('organization_detail', organization_id=organization.id) }}" class="flex items-center space-x-3">
+                <div class="w-3 h-8 rounded-full bg-purple-500"></div>
+                <div class="w-3 h-8 rounded-full bg-blue-500 opacity-70"></div>
+                <div class="w-3 h-8 rounded-full bg-indigo-500 opacity-50"></div>
+            </a>
+            <h1 class="text-3xl font-bold">
+                Danh Sách Kỳ Thi
+            </h1>
+        </div>
+        <a href="{{ url_for('helps_do_exam') }}" 
+           class="flex items-center bg-accent hover:bg-accent/90 text-white px-4 py-2 rounded-lg transition">
+            <i class="fas fa-question-circle mr-2"></i>
+            <span>Hướng dẫn</span>
+        </a>
+    </div>
+
+    <!-- Ongoing Exams Section -->
+    <section class="mb-12">
+        <div class="flex items-center mb-6">
+            <div class="w-2 h-8 bg-accent rounded-full mr-3"></div>
+            <h2 class="text-2xl font-semibold">Kỳ thi đang diễn ra</h2>
+        </div>
+
+        <div id="ongoing-exams" class="grid grid-cols-1 gap-6">
+            {% if ongoing_exams %}
+                {% for exam in ongoing_exams %}
+                    <div class="exam-card bg-secondary rounded-xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div class="flex-1 ">
+                            <h3 class="text-xl font-medium mb-2 ">{{ exam.title }}</h3>
+                            <div class="flex flex-wrap items-center gap-4 text-muted">
+                                <div class="flex items-center">
+                                    <i class="far fa-calendar-alt mr-2"></i>
+                                    <span>{{ exam.start_time.strftime('%d/%m/%Y %H:%M') }} - {{ exam.end_time.strftime('%d/%m/%Y %H:%M') }}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="far fa-clock mr-2"></i>
+                                    <span class="countdown" data-end-time="{{ exam.end_time.isoformat() }}">Còn lại: --:--:--</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col md:flex-row items-center gap-4">
+                            <a href="/assignment/{{ exam.id }}" 
+                            class="join-btn {% if submissions.get(exam.id) %}bg-green-500 hover:bg-green-600 pointer-events-none{% else %}bg-accent hover:bg-accent/90{% endif %} text-white px-6 py-2 rounded-lg font-medium">
+                                {% if submissions.get(exam.id) %}
+                                    <i class="fas fa-check mr-2"></i> Đã tham gia
+                                {% else %}
+                                    <i class="fas fa-sign-in-alt mr-2"></i> Tham gia
+                                {% endif %}
+                            </a>
+                            {% if submissions.get(exam.id) %}
+                            <a href="/view_submit_assignment/{{ exam.id }}" 
+                            class="join-btn bg-accent hover:bg-accent/90 text-white px-6 py-2 rounded-lg font-medium">
+                                    <i class="fas fa-eye mr-2"></i> Xem bài nộp
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div id="no-ongoing-exams" class="bg-secondary/50 rounded-xl p-8 text-center">
+                    <i class="far fa-calendar-times text-4xl text-muted mb-4"></i>
+                    <p class="text-muted text-lg">Không có kỳ thi đang diễn ra.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Past Exams Section -->
+    <section>
+        <div class="flex items-center mb-6">
+            <div class="w-2 h-8 bg-rose-500 rounded-full mr-3"></div>
+            <h2 class="text-2xl font-semibold">Kỳ thi đã qua</h2>
+        </div>
+
+        <div id="past-exams" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {% if past_exams %}
+                {% for exam in past_exams %}
+                    <div class="exam-card bg-secondary rounded-xl p-6 ">
+                        <h3 class="text-xl font-medium mb-2">{{ exam.title }}</h3>
+                        <div class="flex items-center gap-4 text-muted mb-4">
+                            <i class="far fa-calendar-alt"></i>
+                            <span>{{ exam.start_time.strftime('%d/%m/%Y %H:%M') }} - {{ exam.end_time.strftime('%d/%m/%Y %H:%M') }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-rose-400">
+                            <i class="fas fa-hourglass-end"></i>
+                            <span>Đã kết thúc</span>
+                        </div>
+                        {% if submissions.get(exam.id) %}
+                            <div class="flex items-center gap-2 text-green-400 mt-2">
+                                <i class="fas fa-check"></i>
+                                <span>Đã nộp bài</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div id="no-past-exams" class="col-span-full bg-secondary/50 rounded-xl p-8 text-center">
+                    <i class="far fa-calendar-minus text-4xl text-muted mb-4"></i>
+                    <p class="text-muted text-lg">Không có kỳ thi đã qua.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const countdownElements = document.querySelectorAll(".countdown");
+
+        countdownElements.forEach((element) => {
+            const endTime = new Date(element.getAttribute("data-end-time"));
+
+            const updateCountdown = () => {
+                const now = new Date();
+                const diff = endTime - now;
+
+                if (diff <= 0) {
+                    element.innerHTML = "Đã kết thúc";
+                    const joinButton = element.closest(".exam-card").querySelector(".join-btn");
+                    if (joinButton) {
+                        joinButton.disabled = true;
+                        joinButton.classList.remove("bg-accent", "hover:bg-accent/90");
+                        joinButton.classList.add("bg-gray-500", "cursor-not-allowed");
+                    }
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                if (days > 0) {
+                    element.innerHTML = `Còn lại: ${days} ngày ${hours}:${minutes}:${seconds}`;
+                } else if (hours > 0) {
+                    element.innerHTML = `Còn lại: ${hours}:${minutes}:${seconds}`;
+                } else {
+                    element.innerHTML = `Còn lại: 0:${minutes}:${seconds}`;
+                }
+            };
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        });
+    });
+</script>
+{% endblock %}

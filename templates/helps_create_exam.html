@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Hướng Dẫn | CodeJourney {% endblock %}
+{% block link %}
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1e1e2f;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #4f46e5, #9333ea);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .card {
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            background-color: rgba(30, 30, 47, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.125);
+        }
+        
+        .download-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="mx-auto px-4 py-12 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">Hướng Dẫn Tạo Kì Thi</h1>
+            <div class="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-600 mx-auto rounded-full"></div>
+        </div>
+        
+        <!-- Content Card -->
+        <div class="card rounded-xl p-8 mb-8 shadow-2xl text-left">
+            <div class="flex items-start mb-6">
+                <div class="bg-indigo-500/20 p-3 rounded-lg mr-4">
+                    <i class="fas fa-info-circle text-indigo-400 text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-semibold mb-2">Thông tin quan trọng</h2>
+                    <p class="text-gray-300">Khi tạo kì thi, vui lòng đảm bảo bạn đã đọc kỹ hướng dẫn sử dụng và tuân thủ đúng định dạng file.</p>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 my-6"></div>
+            
+            <div class="flex items-start">
+                <div class="bg-purple-500/20 p-3 rounded-lg mr-4">
+                    <i class="fas fa-file-word text-purple-400 text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-semibold mb-2">File mẫu đáp án</h2>
+                    <p class="text-gray-300 mb-4">Khi bạn upload file đáp án, hãy sử dụng file mẫu theo định dạng chuẩn của hệ thống. 
+                        <a href="/static/uploads/exams/ANS_EXAMPLE.docx" 
+                        class="download-btn inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg font-medium text-white hover:from-indigo-700 hover:to-purple-700">
+                            <i class="fas fa-download mr-2"></i>
+                            Tải file mẫu
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional Tips -->
+        <div class="grid md:grid-cols-2 gap-6 text-left">
+            <div class="card rounded-xl p-6">
+                <div class="flex items-center mb-4">
+                    <div class="bg-blue-500/20 p-2 rounded-lg mr-3">
+                        <i class="fas fa-check-circle text-blue-400"></i>
+                    </div>
+                    <h3 class="font-semibold">Định dạng file</h3>
+                </div>
+                <p class="text-gray-300 text-sm">File đáp án phải có định dạng .docx hoặc .doc và tuân thủ cấu trúc như file mẫu để hệ thống có thể xử lý chính xác.</p>
+            </div>
+            
+            <div class="card rounded-xl p-6">
+                <div class="flex items-center mb-4">
+                    <div class="bg-green-500/20 p-2 rounded-lg mr-3">
+                        <i class="fas fa-clock text-green-400"></i>
+                    </div>
+                    <h3 class="font-semibold">Thời gian xử lý</h3>
+                </div>
+                <p class="text-gray-300 text-sm">Hệ thống sẽ mất khoảng 1-2 phút để xử lý file đáp án sau khi upload, vui lòng kiên nhẫn chờ đợi.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row justify-center gap-4 pt-6">
+        <button type="button" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg shadow-md transition-all transform hover:scale-105">
+            <a href="{{ url_for('organization') }}">
+                <i class="fas fa-refresh mr-2"></i> 
+                <span>Quay lại</span>
+            </a>
+        </button>
+    </div>
+{% endblock %}

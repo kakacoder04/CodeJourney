@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Kho Đề Môn {{ subject }} | CodeJourney
+{% endblock %}
+
+{% block link %}
+    <style>
+        body {
+            background-color: #1e1e2f;
+        }
+        .file-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .upload-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-indigo-300">Danh Sách Đề Môn <span class="text-purple-400">{{ subject }}</span></h1>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-book text-purple-400 text-xl"></i>
+        </div>
+    </div>
+
+    <!-- File List -->
+    <div class="file-list">
+        {% if files %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for file in files %}
+                <div class="file-card bg-gray-800 rounded-lg p-6 transition-all duration-300 hover:bg-gray-700 border-l-4 border-purple-500">
+                    <div class="flex items-start mb-4">
+                        <i class="fas fa-file-alt text-purple-400 text-2xl mr-4 mt-1"></i>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white">{{ file.title }}</h3>
+                            <p class="text-gray-400 text-sm mt-1">Mau mau tải xuống để ôn luyện thôi!</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <a href="{{ url_for('download_file', file_id=file.id) }}" 
+                           onclick="return confirmDownload()"
+                           class="download-btn bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md flex items-center transition-colors">
+                            <i class="fas fa-download mr-2"></i>
+                            Tải Xuống
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state bg-gray-800 rounded-lg p-8 text-center">
+                <i class="fas fa-folder-open text-gray-500 text-5xl mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-300 mb-2">Không có file nào</h3>
+                <p class="text-gray-500">Hiện không có file nào cho môn học này.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Upload Button (conditionally shown) -->
+    {% if user_can_upload %}
+    <div class="mt-10 text-center">
+        <a href="{{ url_for('upload_file', subject=subject) }}" 
+           class="upload-btn inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-lg">
+            <i class="fas fa-cloud-upload-alt mr-2"></i>
+            Tải Lên File
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function confirmDownload() {
+        return confirm('Bạn có muốn tải xuống file này không?');
+    }
+
+    // Animation for file cards on load
+    document.addEventListener('DOMContentLoaded', () => {
+        const fileCards = document.querySelectorAll('.file-card');
+        fileCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Tạo Bài Tập | CodeJourney
+{% endblock %}
+
+{% block link %}
+<style>
+        .custom-file-input::-webkit-file-upload-button {
+            visibility: hidden;
+        }
+        .custom-file-input::before {
+            content: 'Chọn Tệp';
+            display: inline-block;
+            background: #4f46e5;
+            color: white;
+            border-radius: 4px;
+            padding: 8px 12px;
+            outline: none;
+            white-space: nowrap;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .custom-file-input:hover::before {
+            background: #4338ca;
+        }
+        .custom-folder-input::-webkit-file-upload-button {
+            visibility: hidden;
+        }
+        .custom-folder-input::before {
+            content: 'Chọn Thư Mục';
+            display: inline-block;
+            background: #4f46e5;
+            color: white;
+            border-radius: 4px;
+            padding: 8px 12px;
+            outline: none;
+            white-space: nowrap;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .custom-folder-input:hover::before {
+            background: #4338ca;
+        }
+        .textarea-autosize {
+            resize: none;
+            overflow: hidden;
+            min-height: 100px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class=" mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-indigo-400">
+                    <i class="fas fa-book-open mr-2"></i>Tạo Bài Tập Mới
+                </h1>
+                <p class="text-indigo-300 mt-1">Tổ chức: <span class="font-semibold">{{ organization.name }}</span></p>
+            </div>
+            <a href="{{ url_for('organization_lessons', organization_id=organization.id) }}" class="flex items-center space-x-3">
+                        <div class="w-3 h-8 rounded-full bg-purple-500"></div>
+                        <div class="w-3 h-8 rounded-full bg-blue-500 opacity-70"></div>
+                        <div class="w-3 h-8 rounded-full bg-indigo-500 opacity-50"></div>
+                    </a>
+        </div>
+
+        <!-- Form Container -->
+        <div class="bg-[#27293d] rounded-xl shadow-2xl overflow-hidden">
+            <!-- Form Header -->
+            <div class="bg-[#1e1e2f] px-6 py-4 border-b border-indigo-900/50">
+                <h2 class="text-xl font-semibold text-indigo-300">
+                    <i class="fas fa-edit mr-2"></i>Thông tin bài tập
+                </h2>
+            </div>
+
+            <!-- Form Content -->
+            <form class="p-6 space-y-6" action="{{ url_for('add_organization_lesson', organization_id=organization.id) }}" method="POST" enctype="multipart/form-data">
+                <!-- Title Field -->
+                <div class="space-y-2">
+                    <label for="title" class="block text-sm font-medium text-indigo-300">
+                        <i class="fas fa-heading mr-2"></i>Tiêu đề bài học
+                    </label>
+                    <input 
+                        type="text" 
+                        id="title" 
+                        name="title" 
+                        placeholder="Nhập tiêu đề bài học" 
+                        required
+                        class="w-full px-4 py-2 bg-[#2a2b3d] border border-indigo-900/50 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-indigo-400/70 transition-all"
+                    >
+                </div>
+
+                <!-- Content Field -->
+                <div class="space-y-2">
+                    <label for="content" class="block text-sm font-medium text-indigo-300">
+                        <i class="fas fa-align-left mr-2"></i>Nội dung bài học
+                    </label>
+                    <textarea 
+                        id="content" 
+                        name="content" 
+                        rows="5" 
+                        placeholder="Nhập nội dung bài học" 
+                        required
+                        class="textarea-autosize w-full px-4 py-2 bg-[#2a2b3d] border border-indigo-900/50 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-indigo-400/70 transition-all"
+                    ></textarea>
+                </div>
+
+                <!-- File Upload -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-indigo-300">
+                        <i class="fas fa-paperclip mr-2"></i>Tải lên tệp tin (nếu có)
+                    </label>
+                    <div class="flex items-center space-x-4">
+                        <input 
+                            type="file" 
+                            name="files" 
+                            id="files" 
+                            multiple
+                            class="custom-file-input"
+                        >
+                        <span id="file-count" class="text-sm text-indigo-300/80">Chưa có tệp nào được chọn</span>
+                    </div>
+                </div>
+
+                <!-- Test Case Folder -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-indigo-300">
+                        <i class="fas fa-folder-open mr-2"></i>Upload Folder Test Case
+                    </label>
+                    <div class="flex items-center space-x-4">
+                        <input 
+                            type="file" 
+                            id="testcase_folder" 
+                            name="testcase_folder" 
+                            webkitdirectory 
+                            directory 
+                            multiple
+                            class="custom-folder-input"
+                        >
+                        <span id="folder-name" class="text-sm text-indigo-300/80">Chưa chọn thư mục</span>
+                    </div>
+                </div>
+
+                <!-- Input/Output Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Input Field -->
+                    <div class="space-y-2">
+                        <label for="input" class="block text-sm font-medium text-indigo-300">
+                            <i class="fas fa-keyboard mr-2"></i>Input (nếu cần)
+                        </label>
+                        <textarea 
+                            id="input" 
+                            name="input" 
+                            rows="3" 
+                            placeholder="Nhập input (nếu có)"
+                            class="textarea-autosize w-full px-4 py-2 bg-[#2a2b3d] border border-indigo-900/50 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-indigo-400/70 transition-all"
+                        ></textarea>
+                    </div>
+
+                    <!-- Output Field -->
+                    <div class="space-y-2">
+                        <label for="output" class="block text-sm font-medium text-indigo-300">
+                            <i class="fas fa-terminal mr-2"></i>Output (nếu cần)
+                        </label>
+                        <textarea 
+                            id="output" 
+                            name="output" 
+                            rows="3" 
+                            placeholder="Nhập output tương ứng"
+                            class="textarea-autosize w-full px-4 py-2 bg-[#2a2b3d] border border-indigo-900/50 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-indigo-400/70 transition-all"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-indigo-900/50">
+                    <button 
+                        type="button" 
+                        class="px-6 py-2 bg-transparent border border-indigo-500 text-indigo-400 rounded-lg hover:bg-indigo-900/30 transition-colors"
+                    >
+                        <a href="{{ url_for('organization_lessons', organization_id=organization.id) }}" >Hủy bỏ</a>
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center"
+                    >
+                        <i class="fas fa-save mr-2"></i> Lưu bài học
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Auto-resize textareas
+        document.querySelectorAll('.textarea-autosize').forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+        });
+
+        // File input handler
+        document.getElementById('files').addEventListener('change', function(e) {
+            const fileCount = document.getElementById('file-count');
+            if (this.files.length > 0) {
+                fileCount.textContent = `${this.files.length} tệp đã được chọn`;
+                fileCount.classList.remove('text-indigo-300/80');
+                fileCount.classList.add('text-indigo-300');
+            } else {
+                fileCount.textContent = 'Chưa có tệp nào được chọn';
+                fileCount.classList.remove('text-indigo-300');
+                fileCount.classList.add('text-indigo-300/80');
+            }
+        });
+
+        // Folder input handler
+        document.getElementById('testcase_folder').addEventListener('change', function(e) {
+            const folderName = document.getElementById('folder-name');
+            if (this.files.length > 0) {
+                folderName.textContent = `${this.files.length} tệp đã được chọn`;
+                folderName.classList.remove('text-indigo-300/80');
+                folderName.classList.add('text-indigo-300');
+            } else {
+                folderName.textContent = 'Chưa chọn thư mục';
+                folderName.classList.remove('text-indigo-300');
+                folderName.classList.add('text-indigo-300/80');
+            }
+        });
+    </script>
+{% endblock %}

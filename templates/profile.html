@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+
+{% block title %}Hồ Sơ | CodeJourney{% endblock %}
+
+{% block link %}
+    <style>
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .avatar-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #4fd1c5;
+            z-index: 1;
+            position: relative;
+        }
+        .avatar-frame {
+            position: absolute;
+            top: -10%; 
+            left: -10%; 
+            width: 180px; 
+            height: 180px;
+            z-index: 3; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .frame-image {
+            top: -5%;
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .frame-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%; 
+        }
+        .status-icon {
+            position: absolute;
+            bottom: 5%; 
+            right: 5%; 
+            width: 40px; 
+            height: 40px;
+            z-index: 3; 
+            border-radius: 50%; 
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+        }
+        .top-rank-icon {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            top: -10%;
+            left: -10%;
+            z-index: 3;
+        }
+        .highest-achievement-icon {
+            width: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .icon-item img {
+            transition: all 0.3s ease;
+        }
+        .icon-item img:hover {
+            transform: scale(1.1);
+        }
+        .profile-container {
+            background: linear-gradient(145deg, rgba(30, 30, 47, 0.9), rgba(46, 46, 70, 0.9));
+            border: 2px solid rgba(79, 209, 197, 0.3);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .floating-btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .floating-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        .info-card {
+            background: rgba(74, 85, 104, 0.2);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(79, 209, 197, 0.1);
+        }
+        .info-card:hover {
+            background: rgba(74, 85, 104, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        .streak-table th {
+            background: rgba(74, 85, 104, 0.3);
+            color: #81e6d9;
+        }
+        .streak-table td {
+            background: rgba(74, 85, 104, 0.1);
+        }
+        .streak-table tr:hover td {
+            background: rgba(74, 85, 104, 0.2);
+        }
+        .achievement-badge {
+            position: relative;
+            display: inline-block;
+        }
+        .achievement-badge::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 50%;
+            /* background: radial-gradient(circle, rgba(255,215,0,0.4) 0%, rgba(255,215,0,0) 70%); */
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+            100% { transform: scale(0.95); opacity: 0.7; }
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(79, 209, 197, 0.7);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container mx-auto px-6 py-8 max-w-6xl">
+        <!-- Profile Header -->
+        <div class="text-center mb-12 relative">
+            <!-- Decorative elements -->
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden opacity-20">
+                <div class="absolute top-10 left-10 w-20 h-20 rounded-full bg-teal-500 blur-xl"></div>
+                <div class="absolute bottom-10 right-10 w-24 h-24 rounded-full bg-purple-500 blur-xl"></div>
+            </div>
+            
+            <div class="avatar-container mb-6">
+                {% if user.selected_frame %}
+                <!-- Frame (if exists) -->
+                    <div class="avatar-frame">
+                        <img src="{{ url_for('static', filename='uploads/frames/' + user.selected_frame.image) }}" alt="Frame" class="frame-image">
+                    </div>
+                {% endif %}
+                
+                <!-- Avatar -->
+                <img src="{{ user.avatar if user.avatar else '/static/images/avt.png' }}" alt="Avatar" class="avatar-image">
+                
+                {% set selected_icon = user.status_icons | selectattr('selected', 'eq', True) | first %}
+                {% if selected_icon %}
+                    <img src="{{ url_for('static', filename='uploads/set_icon/' + selected_icon.icon.image) }}" alt="Status Icon" class="status-icon">
+                {% endif %}
+                
+                {% if top_icon %}
+                    <img src="{{ url_for('static', filename='icons/' + top_icon) }}" alt="Top Rank" class="top-rank-icon">
+                {% endif %}
+            </div>
+            
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-300 mb-2 glow-text">{{ user.username }}</h1>
+            <p class="text-lg text-gray-300 mb-4">"CodeJourney Member!"</p>
+            
+            {% if highest_achievement %}
+            <!-- Highest Achievement -->
+            <div class="mt-6">
+                <h3 class="text-xl font-semibold text-teal-300 mb-2">Huy hiệu cao nhất</h3>
+                <div class="achievement-badge">
+                    <img src="{{ url_for('static', filename='icons/rank/' + highest_achievement.id + '.png') }}" alt="Highest Achievement" class="highest-achievement-icon">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Status Icons Section -->
+        <div class="mb-12">
+            {% if status_icons %}
+            <h3 class="text-2xl font-bold text-center text-purple-300 mb-6 glow-text">Biểu tượng của bạn</h3>
+            {% endif %}
+            <div class="user-icons flex flex-wrap justify-center gap-4">
+                {% for icon in status_icons %}
+                <div class="icon-item">
+                    <img src="{{ url_for('static', filename='uploads/set_icon/' + icon.icon.image) }}" alt="Icon" class="rounded-full border-2 border-blue-400"
+                        style="width: 64px; height: 64px; border: {% if icon.selected %} 3px solid red; {% else %} 2px solid blue; {% endif %}"
+                        onclick="setStatusIcon({{ icon.icon_id }})">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Profile Info -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 text-center">
+            <div class="info-card p-6 rounded-xl">
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-blue-500 bg-opacity-20 flex items-center justify-center mb-3">
+                        <i class="fas fa-user text-blue-300 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-blue-300 mb-2">Tên</h3>
+                    <p class="text-gray-200">{% if user.username|length > 20 %}
+                        {{ user.username[:20] ~ '...' }}
+                    {% else %}
+                        {{ user.username }}
+                    {% endif %}</p>
+                </div>
+            </div>
+            <div class="info-card p-6 rounded-xl">
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-purple-500 bg-opacity-20 flex items-center justify-center mb-3">
+                        <i class="fas fa-envelope text-purple-300 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-purple-300 mb-2">Email</h3>
+                    <p class="text-gray-200">{% if user.email|length > 20 %}
+                        {{ user.email[:20] ~ '...' }}
+                    {% else %}
+                        {{ user.email }}
+                    {% endif %}</p>
+                </div>
+            </div>
+            <div class="info-card p-6 rounded-xl">
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-teal-500 bg-opacity-20 flex items-center justify-center mb-3">
+                        <i class="fas fa-quote-left text-teal-300 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-teal-300 mb-2">Slogan</h3>
+                    <p class="text-gray-200">{% set slogan = user.slogan if user.slogan else "CodeJourney Member!" %}
+                    {% if slogan|length > 20 %}
+                        {{ slogan[:20] ~ '...' }}
+                    {% else %}
+                        {{ slogan }}
+                    {% endif %}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Streak Table -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-center text-yellow-300 mb-6 glow-text">Bảng Streak</h2>
+            <div class="overflow-x-auto rounded-xl">
+                <table class="w-full streak-table">
+                    <thead>
+                        <tr>
+                            <th class="py-4 px-6 text-center">
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-code text-xl mb-1"></i>
+                                    <span>Số bài giải được</span>
+                                </div>
+                            </th>
+                            <th class="py-4 px-6 text-center">
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-tasks text-xl mb-1"></i>
+                                    <span>Số nhiệm vụ hoàn thành</span>
+                                </div>
+                            </th>
+                            <th class="py-4 px-6 text-center">
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-fire text-xl mb-1"></i>
+                                    <span>Chuỗi hoạt động</span>
+                                </div>
+                            </th>
+                            <th class="py-4 px-6 text-center">
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-trophy text-xl mb-1"></i>
+                                    <span>Huy hiệu cao nhất</span>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="text-center">
+                            {% if streak_data.problems_solved %}
+                            <td class="py-4 px-6">{{ streak_data.problems_solved }}</td>
+                            {% else %}
+                            <td class="py-4 px-6">0</td>
+                            {% endif %}
+
+                            {% if streak_data.tasks_completed %}
+                            <td class="py-4 px-6">{{ streak_data.tasks_completed }}</td>
+                            {% else %}
+                            <td class="py-4 px-6">0</td>
+                            {% endif %}
+
+                            <td class="py-4 px-6">{{ streak_data.streak }} ngày</td>
+
+                            {% if streak_data.highest_achievement %}
+                            <td class="py-4 px-6">{{ streak_data.highest_achievement }}</td>
+                            {% else %}
+                            <td class="py-4 px-6">Chưa có huy hiệu nào</td>
+                            {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if is_current_user %}
+        <!-- Floating Action Buttons -->
+        <div class="fixed right-6 bottom-6 flex flex-col space-y-4">
+            <a href="{{ url_for('edit_profile') }}" class="floating-btn bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center">
+                <i class="fas fa-user-edit mr-2"></i>
+                <span class="hidden sm:inline">Edit Profile</span>
+            </a>
+            <a href="{{ url_for('logout') }}" class="floating-btn bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                <span class="hidden sm:inline">Logout</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function setStatusIcon(iconId) {
+            fetch(`/set_status_icon/${iconId}`, {
+                method: 'POST'
+            })
+            .then(() => {
+                location.reload();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+{% endblock %}
+

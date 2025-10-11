@@ -1,0 +1,378 @@
+{% extends 'base.html' %}
+
+{% block title %}Rank | CodeJourney{% endblock %}
+{% block link %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(90deg, #58cc02, #52cff8, #ff5f6d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .profile-btn {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .profile-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 9999px;
+            padding: 2px;
+            background: linear-gradient(90deg, #58cc02, #52cff8, #ff5f6d);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+            z-index: -1;
+        }
+        
+        .avatar-border {
+            background: linear-gradient(90deg, #58cc02, #52cff8, #ff5f6d);
+        }
+        
+        .gold-card {
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.8);
+            border: 3px solid #FFD700;
+            background: linear-gradient(135deg, #FFD700, #FFC107);
+        }
+        
+        .silver-card {
+            box-shadow: 0 15px 40px rgba(192, 192, 192, 0.8);
+            border: 3px solid #C0C0C0;
+            background: linear-gradient(135deg, #C0C0C0, #A9A9A9);
+        }
+        
+        .bronze-card {
+            box-shadow: 0 15px 40px rgba(205, 127, 50, 0.8);
+            border: 3px solid #CD7F32;
+            background: linear-gradient(135deg, #CD7F32, #A0522D);
+        }
+        
+        .gold-card:hover {
+            transform: translateY(-15px) scale(1.1);
+            box-shadow: 0 20px 50px rgba(255, 215, 0, 1);
+        }
+        
+        .silver-card:hover {
+            transform: translateY(-15px) scale(1.1);
+            box-shadow: 0 20px 50px rgba(192, 192, 192, 1);
+        }
+        
+        .bronze-card:hover {
+            transform: translateY(-15px) scale(1.1);
+            box-shadow: 0 20px 50px rgba(205, 127, 50, 1);
+        }
+        
+        .table-row:hover td {
+            background-color: #4b5563;
+        }
+        
+        .view-link:hover {
+            color: #00ffff;
+        }
+
+        .hidden-row {
+            display: none;
+        }
+
+        .view-profile-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #85a9db, #5b78df); 
+            color: #ffffff; 
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 20px;
+            border: 2px solid rgba(82, 207, 248, 0.7); 
+            position: relative; 
+            transition: all 0.3s ease;
+        }
+
+        .view-profile-btn::before {
+            content: "";
+            position: absolute;
+            top: 0; 
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px; 
+            padding: 2px; 
+            background: linear-gradient(90deg, #58cc02, #52cff8, #ff5f6d); 
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+            transition: all 0.3s ease;
+        }
+
+        .view-profile-btn:hover {
+            background: linear-gradient(135deg, #394264, #4e5d86);
+            color: #52cff8; 
+        }
+
+        .view-profile-btn:hover::before {
+            background: linear-gradient(90deg, #52cff8, #58cc02, #ff5f6d); 
+        }
+        .view-profile-btn {
+            padding: 10px 25px; 
+            font-size: 16px; 
+            font-weight: bold;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .view-profile-btn:hover {
+            transform: scale(1.1); 
+        }
+
+        @media (max-width: 768px) {
+            .view-profile-btn {
+                display: none;
+            }
+            
+            .top-users-container {
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
+                padding: 20px 0;
+            }
+            
+            .top-users-container > div {
+                width: 28% !important;
+                height: auto !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border-radius: 50% !important;
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                aspect-ratio: 1/1;
+                box-shadow: none !important;
+            }
+            
+            .top-users-container > div .relative {
+                margin: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+    
+            .top-users-container > div h2 {
+                display: none !important;
+            }
+            
+            .top-users-container > div .avatar-border {
+                width: 100% !important;
+                height: 100% !important;
+                border-radius: 50% !important;
+                border-width: 3px !important;
+                padding: 3px !important;
+            }
+            
+            .top-users-container > div img {
+                width: 100% !important;
+                height: 100% !important;
+                border-radius: 50% !important;
+            }
+            
+            .top-users-container > div .absolute {
+                display: none !important;
+            }
+            
+            .top-users-container > div .flex.items-center {
+                display: none !important;
+            }
+
+            .top-users-container > div .num {
+                display: none !important;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class=" mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold gradient-text mb-4">Top Users</h1>
+            <p class="text-gray-400 max-w-2xl mx-auto text-lg">See who's leading the coding challenges and get inspired to climb the ranks!</p>
+        </div>
+
+        <!-- Top Users Cards -->
+        <div class="flex flex-row flex-wrap lg:flex-nowrap items-center justify-center gap-4 lg:gap-8 mb-16 top-users-container">
+            <!-- Silver Card (2nd place) -->
+            <div class="w-[30%] lg:w-64 xl:w-72 h-64 lg:h-96 rounded-xl flex flex-col items-center justify-center p-4 lg:p-6 silver-card transition-all duration-300 hover:z-10 floating cursor-pointer" onclick="{% if top_users[1].check != 'fake_user' %}window.location.href='{{ url_for('view_profile', user_id=top_users[1].id) }}'{% endif %}" data-rank="2">
+                <div class="relative mb-6">
+                    <div class="avatar-border rounded-full p-1">
+                        <img src="{{ top_users[1].avatar }}" alt="User Avatar" class="w-24 h-24 rounded-full object-cover">
+                    </div>
+                    <div class="num absolute -bottom-2 -right-2 bg-gray-700 rounded-full w-10 h-10 flex items-center justify-center">
+                        <span class="text-xl font-bold">2</span>
+                    </div>
+                </div>
+                <h2 class="text-xl font-bold mb-2">{{ top_users[1].username }}</h2>
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-star text-yellow-400 mr-2"></i>
+                    <span class="font-bold">{{ top_users[1].points }}</span>
+                </div>
+                {% if top_users[1].check == "fake_user" %}
+                    <a href="#" class="view-profile-btn">View Profile</a>
+                {% else %}
+                    <a href="{{ url_for('view_profile', user_id=top_users[1].id) }}" class="view-profile-btn">View Profile</a>
+                {% endif %}
+            </div>
+            
+            <!-- Gold Card (1st place) -->
+            <div class="w-[30%] lg:w-72 xl:w-80 h-72 lg:h-[28rem] rounded-xl flex flex-col items-center justify-center p-4 lg:p-8 gold-card transition-all duration-300 hover:z-10 mb-0 lg:mb-0 floating cursor-pointer md:h-[28rem]" style="animation-delay: 0.5s;" onclick="{% if top_users[0].check != 'fake_user' %}window.location.href='{{ url_for('view_profile', user_id=top_users[0].id) }}'{% endif %}" data-rank="1">
+                <div class="relative mb-8">
+                    <div class="avatar-border rounded-full p-1">
+                        <img src="{{ top_users[0].avatar }}" alt="User Avatar" class="w-28 h-28 rounded-full object-cover">
+                    </div>
+                    <div class="num absolute -bottom-2 -right-2 bg-yellow-500 rounded-full w-12 h-12 flex items-center justify-center">
+                        <i class="fas fa-crown text-white"></i>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold mb-3">{{ top_users[0].username }}</h2>
+                <div class="flex items-center mb-6">
+                    <i class="fas fa-trophy text-red-600 mr-2"></i>
+                    <span class="font-bold text-xl">{{ top_users[0].points }}</span>
+                </div>
+                {% if top_users[0].check == "fake_user" %}
+                    <a href="#" class="view-profile-btn">View Profile</a>
+                {% else %}
+                    <a href="{{ url_for('view_profile', user_id=top_users[0].id) }}" class="view-profile-btn">View Profile</a>
+                {% endif %}
+            </div>
+            
+            <!-- Bronze Card (3rd place) -->
+            <div class="w-[30%] lg:w-64 xl:w-72 h-64 lg:h-96 rounded-xl flex flex-col items-center justify-center p-4 lg:p-6 bronze-card transition-all duration-300 hover:z-10 floating cursor-pointer" style="animation-delay: 1s;" onclick="{% if top_users[2].check != 'fake_user' %}window.location.href='{{ url_for('view_profile', user_id=top_users[2].id) }}'{% endif %}" data-rank="3">
+                <div class="relative mb-6">
+                    <div class="avatar-border rounded-full p-1">
+                        <img src="{{ top_users[2].avatar }}" alt="User Avatar" class="w-24 h-24 rounded-full object-cover">
+                    </div>
+                    <div class="num absolute -bottom-2 -right-2 bg-gray-700 rounded-full w-10 h-10 flex items-center justify-center">
+                        <span class="text-xl font-bold">3</span>
+                    </div>
+                </div>
+                <h2 class="text-xl font-bold mb-2">{{ top_users[2].username }}</h2>
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-medal text-amber-500 mr-2"></i>
+                    <span class="font-bold">{{ top_users[2].points }}</span>
+                </div>
+                {% if top_users[2].check == "fake_user" %}
+                    <a href="#" class="view-profile-btn">View Profile</a>
+                {% else %}
+                    <a href="{{ url_for('view_profile', user_id=top_users[2].id) }}" class="view-profile-btn">View Profile</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- All Users Table -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold gradient-text mb-4 md:mb-0">All Users</h2>
+                <div class="relative w-full md:w-64 search-input">
+                    <input type="text" id="searchInput" placeholder="Search users..." class="bg-gray-700 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full rounded-xl overflow-hidden">
+                    <thead class="bg-gradient-to-r from-yellow-500 to-yellow-400 text-gray-900">
+                        <tr>
+                            <th class="py-3 px-4 text-left">Rank</th>
+                            <th class="py-3 px-4 text-left">Username</th>
+                            <th class="py-3 px-4 text-center">Points</th>
+                            <th class="py-3 px-4 text-center">Solved</th>
+                            <th class="py-3 px-4 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody" class="divide-y divide-gray-700">
+                        {% for user in all_users %}
+                        <tr class="table-row transition-colors duration-200 hover:bg-gray-700" data-username="{{ user.username.lower() }}">
+                            <td class="py-4 px-4">
+                                <span class="rank-badge {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% else %}rank-4-plus{% endif %}">
+                                    {{ loop.index + 3 }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="flex items-center">
+                                    <img src="{{ user.avatar }}" alt="{{ user.username }}" class="w-8 h-8 rounded-full mr-3">
+                                    <a href="{{ url_for('view_profile', user_id=user.id) }}" class="font-medium view-link transition-colors duration-200 hover:text-blue-400">
+                                        {{ user.username }}
+                                    </a>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center font-mono">
+                                <span class="bg-gray-700 px-3 py-1 rounded-full">{{ user.points }}</span>
+                            </td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="bg-green-900 text-green-300 px-3 py-1 rounded-full">{{ user.problems_solved }}</span>
+                            </td>
+                            <td class="py-4 px-4 text-center">
+                                {% if user.check == "fake_user" %}
+                                    <a href="#" class="text-blue-400 hover:text-blue-300 transition-colors">
+                                        <i class="fas fa-user-circle"></i> View
+                                    </a>
+                                {% else %}
+                                    <a href="{{ url_for('view_profile', user_id=user.id) }}" class="text-blue-400 hover:text-blue-300 transition-colors">
+                                        <i class="fas fa-user-circle"></i> View
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('#searchInput');
+            const rows = document.querySelectorAll('#userTableBody tr');
+            
+            // Floating animation for top cards
+            const floatingCards = document.querySelectorAll('.floating');
+            floatingCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.2}s`;
+            });
+            
+            // Search functionality
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                
+                rows.forEach(row => {
+                    const username = row.getAttribute('data-username');
+                    if (username.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Highlight current user in the table
+            // This would need server-side implementation to identify the current user
+            // rows.forEach(row => {
+            //     if (row.dataset.userId === currentUserId) {
+            //         row.classList.add('bg-blue-900', 'bg-opacity-30');
+            //         row.classList.add('border-l-4', 'border-blue-400');
+            //     }
+            // });
+        });
+    </script>
+{% endblock %}

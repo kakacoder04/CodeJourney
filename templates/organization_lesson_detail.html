@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Chi Tiết Bài Tập | CodeJourney
+{% endblock %}
+
+{% block link %}
+<style>
+        .code-editor {
+            font-family: 'Courier New', monospace;
+            tab-size: 4;
+        }
+        .content-box {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .testcase-box {
+            scrollbar-width: thin;
+            scrollbar-color: #4b5563 #1e1e2f;
+        }
+        .testcase-box::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .testcase-box::-webkit-scrollbar-track {
+            background: #1e1e2f;
+        }
+        .testcase-box::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 6px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class=" mx-auto px-4 py-8 max-w-6xl">
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Left Section - Challenge Details -->
+            <div class="lg:w-1/2 bg-[#2a2a3f] rounded-xl p-6 shadow-lg">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-blue-400">Chi Tiết Bài Tập</h2>
+                    <a href="{{ url_for('organization_lessons', organization_id=lesson.organization_id) }}" class="flex items-center space-x-3">
+                        <div class="w-3 h-8 rounded-full bg-purple-500"></div>
+                        <div class="w-3 h-8 rounded-full bg-blue-500 opacity-70"></div>
+                        <div class="w-3 h-8 rounded-full bg-indigo-500 opacity-50"></div>
+                    </a>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-3 text-purple-300 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i> Mô tả bài tập
+                    </h3>
+                    <div class="bg-[#1e1e2f] p-4 rounded-lg content-box">
+                        {{ lesson.content }}
+                    </div>
+                </div>
+
+                {% if lesson.file_paths %}
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-3 text-purple-300 flex items-center">
+                        <i class="fas fa-paperclip mr-2"></i> Tệp đính kèm
+                    </h3>
+                    <ul class="space-y-2">
+                        {% for file in lesson.file_paths %}
+                        <li>
+                            <a href="{{ url_for('static', filename='uploads/' + file) }}" target="_blank" 
+                               class="flex items-center text-blue-400 hover:text-blue-300 transition-colors">
+                                <i class="fas fa-file-alt mr-2"></i> {{ file }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if lesson.input_data and lesson.output_data %}
+                <div>
+                    <h3 class="text-lg font-semibold mb-3 text-purple-300 flex items-center">
+                        <i class="fas fa-vial mr-2"></i> Test Cases Mẫu
+                    </h3>
+                    <div class="bg-[#1e1e2f] rounded-lg overflow-hidden">
+                        <div class="p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="text-sm font-medium mb-2 text-green-400 flex items-center">
+                                        <i class="fas fa-sign-in-alt mr-2"></i> Input
+                                    </h4>
+                                    <div class="bg-[#2a2a3f] p-3 rounded testcase-box max-h-40 overflow-y-auto content-box">
+                                        {{ lesson.input_data }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium mb-2 text-red-400 flex items-center">
+                                        <i class="fas fa-sign-out-alt mr-2"></i> Output
+                                    </h4>
+                                    <div class="bg-[#2a2a3f] p-3 rounded testcase-box max-h-40 overflow-y-auto content-box">
+                                        {{ lesson.output_data }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Section - Code Editor -->
+            <div class="lg:w-1/2 bg-[#2a2a3f] rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4 text-blue-400 flex items-center">
+                    <i class="fas fa-code mr-2"></i> Viết code tại đây
+                </h3>
+                
+                <div class="mb-4 relative">
+                    <textarea id="code-editor" 
+                              class="w-full h-64 bg-[#1e1e2f] text-gray-200 p-4 rounded-lg code-editor focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Nhập code của bạn ở đây..."></textarea>
+                    <div class="absolute top-2 right-2 flex space-x-2">
+                        <button class="text-gray-400 hover:text-white" title="Clear" onclick="document.getElementById('code-editor').value = ''">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end mb-4">
+                    <button id="run-code" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg flex items-center transition-colors">
+                        <i class="fas fa-play mr-2"></i> Chạy Code
+                    </button>
+                </div>
+                
+                <div id="results" class="bg-[#1e1e2f] rounded-lg p-4 min-h-20">
+                    <div class="text-center text-gray-500">
+                        <i class="fas fa-terminal"></i> Kết quả sẽ hiển thị ở đây
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Handle Tab key in code editor
+        const editor = document.getElementById('code-editor');
+        editor.addEventListener('keydown', function(event) {
+            if (event.key === 'Tab') {
+                event.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const tab = '    '; // 4 spaces
+                this.value = this.value.substring(0, start) + tab + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + tab.length;
+            }
+        });
+
+        document.getElementById('run-code').addEventListener('click', () => {
+            const code = editor.value;
+            const resultsDiv = document.getElementById('results');
+            
+            // Show loading state
+            resultsDiv.innerHTML = `
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                    <span>Đang chạy code...</span>
+                </div>
+            `;
+
+            // Send code to server
+            fetch(`/run_code_organization/{{ lesson.id }}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Clear previous results
+                resultsDiv.innerHTML = '';
+                
+                // Display results based on status
+                if (data.status === 'ACCEPT') {
+                    resultsDiv.innerHTML = `
+                        <div class="flex items-center text-green-500">
+                            <i class="fas fa-check-circle mr-2 text-xl"></i>
+                            <span class="font-bold">ACCEPT</span>
+                        </div>
+                        <div class="mt-2 text-green-400">
+                            <i class="fas fa-thumbs-up mr-2"></i> Code của bạn đã vượt qua tất cả test cases!
+                        </div>
+                    `;
+                } 
+                else if (data.status === 'WRONG') {
+                    resultsDiv.innerHTML = `
+                        <div class="flex items-center text-red-500">
+                            <i class="fas fa-times-circle mr-2 text-xl"></i>
+                            <span class="font-bold">WRONG ANSWER</span>
+                        </div>
+                        <div class="mt-2 text-red-400">
+                            <i class="fas fa-bug mr-2"></i> Code của bạn chưa đúng với yêu cầu.
+                        </div>
+                    `;
+                    
+                    // Display test results
+                    const testResults = document.createElement('div');
+                    testResults.className = 'mt-4 space-y-3';
+                    testResults.innerHTML = '<h4 class="text-sm font-medium text-gray-400">Chi tiết test cases:</h4>';
+                    
+                    data.test_results.forEach((result, index) => {
+                        const testDiv = document.createElement('div');
+                        testDiv.className = 'bg-[#2a2a3f] p-3 rounded';
+                        
+                        const statusDiv = document.createElement('div');
+                        statusDiv.className = `flex items-center ${result.pass ? 'text-green-400' : 'text-red-400'}`;
+                        statusDiv.innerHTML = `
+                            <i class="fas ${result.pass ? 'fa-check' : 'fa-times'} mr-2"></i>
+                            <span>Test ${index + 1}: ${result.pass ? 'PASS' : 'FAIL'}</span>
+                        `;
+                        
+                        const outputDiv = document.createElement('div');
+                        outputDiv.className = 'mt-1 text-xs text-gray-300';
+                        outputDiv.textContent = `Output: ${result.output}`;
+                        
+                        testDiv.appendChild(statusDiv);
+                        testDiv.appendChild(outputDiv);
+                        testResults.appendChild(testDiv);
+                    });
+                    
+                    resultsDiv.appendChild(testResults);
+                } 
+                else if (data.status === 'TIME_LIMIT') {
+                    resultsDiv.innerHTML = `
+                        <div class="flex items-center text-yellow-500">
+                            <i class="fas fa-clock mr-2 text-xl"></i>
+                            <span class="font-bold">TIME LIMIT EXCEEDED</span>
+                        </div>
+                        <div class="mt-2 text-yellow-400">
+                            <i class="fas fa-hourglass-half mr-2"></i> Code của bạn chạy quá lâu. Hãy tối ưu thuật toán!
+                        </div>
+                    `;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                resultsDiv.innerHTML = `
+                    <div class="flex items-center text-red-500">
+                        <i class="fas fa-exclamation-triangle mr-2 text-xl"></i>
+                        <span class="font-bold">LỖI</span>
+                    </div>
+                    <div class="mt-2 text-red-400">
+                        Đã xảy ra lỗi khi chạy code. Vui lòng thử lại!
+                    </div>
+                `;
+            });
+        });
+    </script>
+{% endblock %}

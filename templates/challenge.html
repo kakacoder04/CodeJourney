@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Thử Thách | CodeJourney{% endblock %}
+
+{% block link %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e1e2f',
+                        secondary: '#2a2a3f',
+                        accent: '#4f46e5',
+                        tealAccent: '#4fd1c5',
+                        bronze: '#CD7F32',
+                        silver: '#C0C0C0',
+                        gold: '#FFD700'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s infinite',
+                        'bounce-in': 'bounceIn 0.6s ease-out'
+                    },
+                    keyframes: {
+                        bounceIn: {
+                            '0%': { transform: 'scale(0.1)', opacity: '0' },
+                            '60%': { transform: 'scale(1.2)', opacity: '1' },
+                            '100%': { transform: 'scale(1)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1e1e2f;
+            color: #ffffff;
+        }
+        .ribbon {
+            width: 80px;
+            height: 80px;
+            overflow: hidden;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            z-index: 10;
+        }
+        .ribbon span {
+            position: absolute;
+            display: block;
+            width: 160px;
+            padding: 6px 0;
+            background-color: #10B981;
+            color: #ffffff;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            transform: rotate(45deg);
+            top: 20px;
+            right: -38px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .glow-card:hover {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+            transform: translateY(-8px);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .difficulty-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+ <div class="min-h-screen">
+        <div class=" mx-auto px-4 py-12">
+            <!-- Header Section -->
+            <div class="text-center mb-12 px-4">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 gradient-text">
+                    Thử Thách Của Bạn
+                </h1>
+                <p class="text-lg text-indigo-200 max-w-2xl mx-auto">
+                    Chinh phục các thử thách và thu thập huy hiệu để trở thành bậc thầy lập trình!
+                </p>
+                
+                <!-- Filter Controls -->
+                <div class="mt-8 flex flex-col md:flex-row items-center justify-center gap-4">
+                    <label for="category-filter" class="text-yellow-300 font-medium">
+                        <i class="fas fa-filter mr-2"></i>Lọc theo dạng bài:
+                    </label>
+                    <div class="relative w-full md:w-auto">
+                        <select id="category-filter" onchange="filterChallenges()"
+                            class="w-full md:w-56 appearance-none bg-secondary border border-indigo-900 rounded-xl py-2 pl-4 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all cursor-pointer">
+                            <option value="">Tất cả</option>
+                            {% for category in categories %}
+                            <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
+                                {{ category | capitalize }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenges Grid -->
+            {% if challenges %}
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 px-4 mt-8">
+                {% for challenge in challenges %}
+                <div class="bg-secondary rounded-xl p-4 text-center relative overflow-hidden transition-all duration-300 glow-card border border-indigo-900/50 flex flex-col items-center">
+                    <!-- Difficulty Badge -->
+                    <span class="difficulty-badge {{ 'bg-bronze text-bronze-100' if challenge.difficulty == 'beginner' else 'bg-silver text-silver-100' if challenge.difficulty == 'intermediate' else 'bg-gold text-yellow-900' }}">
+                        {{ challenge.difficulty | capitalize }}
+                    </span>
+                    
+                    <!-- Completed Ribbon -->
+                    {% if challenge.id in completed_challenge_ids %}
+                    <div class="ribbon">
+                        <span>Hoàn thành</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Challenge Link -->
+                    <a href="{{ url_for('challenge_detail', id=challenge.id) }}" class="w-full h-full flex flex-col items-center justify-between pt-8 pb-4">
+                        <!-- Challenge Icon -->
+                        <div class="mb-4 transition-transform duration-300 hover:scale-110">
+                            <i class="fas fa-trophy text-4xl"
+                                style="color: {% if challenge.difficulty == 'beginner' %}#CD7F32{% elif challenge.difficulty == 'intermediate' %}#C0C0C0{% else %}#FFD700{% endif %};"></i>
+                        </div>
+                        
+                        <!-- Challenge Details -->
+                        <div class="w-full">
+                            <span class="block text-xl font-bold text-indigo-300">Bài {{ loop.index }}</span>
+                            {% if challenge.category %}
+                            <span class="inline-block mt-2 bg-indigo-900/30 text-indigo-300 px-2 py-1 rounded-full text-xs font-medium">
+                                {{ challenge.category | capitalize }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-16 bg-secondary rounded-xl mt-8">
+                <div class="inline-block p-6 bg-indigo-900/20 rounded-full mb-4">
+                    <i class="fas fa-trophy text-4xl text-indigo-900/30"></i>
+                </div>
+                <h3 class="text-xl text-indigo-300 font-medium mb-2">Không tìm thấy thử thách!</h3>
+                <p class="text-indigo-400 max-w-md mx-auto">
+                    Hiện không có thử thách nào phù hợp với bộ lọc của bạn. Hãy thử tìm kiếm với danh mục khác.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function filterChallenges() {
+            const category = document.getElementById('category-filter').value;
+            const url = new URL(window.location.href);
+            
+            if (category) {
+                url.searchParams.set('category', category);
+            } else {
+                url.searchParams.delete('category');
+            }
+            
+            window.location.href = url.toString();
+        }
+
+        // Add hover animations
+        document.querySelectorAll('.glow-card').forEach(card => {
+            const trophy = card.querySelector('.fas.fa-trophy');
+            
+            card.addEventListener('mouseenter', () => {
+                if (trophy) {
+                    trophy.classList.add('animate-pulse-slow');
+                }
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                if (trophy) {
+                    trophy.classList.remove('animate-pulse-slow');
+                }
+            });
+        });
+        
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.glow-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('opacity-100');
+                }, index * 100);
+            });
+        });
+    </script>
+{% endblock %}

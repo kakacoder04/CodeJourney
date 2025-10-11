@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block title %}
+   Kho Đề | CodeJourney
+{% endblock %}
+
+{% block link %}
+    <style>
+        .subject-card {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        .subject-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.7);
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .mobilex {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile {
+                display: none !important;
+            }
+            .mobilex {
+                display: flex !important;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-[#1e1e2f] min-h-screen text-gray-100">
+    <div class="mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-12">
+            <div class="mobile">
+                <h1 class="text-4xl font-bold gradient-text">Kho Đề</h1>
+                <p class="text-indigo-300 mt-2">Tổng hợp các đề thi chất lượng cao</p>
+            </div>
+            <div class="mobilex">
+                <h1 class="text-3xl font-bold gradient-text">Kho Đề Các Môn</h1>
+            </div>
+            <div class="mobile flex items-center space-x-4">
+                <div class="relative">
+                    <input type="text" placeholder="Tìm kiếm môn học..." 
+                        class="bg-[#2a2a3f] text-white px-4 py-2 rounded-full pl-10 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <i class="fas fa-search absolute left-3 top-3 text-indigo-400"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Subjects Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Subject Card 1: Toán -->
+            <div class="subject-card bg-[#2a2a3f] rounded-xl p-6 shadow-lg border border-[#3a3a4f]">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-indigo-900 flex items-center justify-center">
+                        <i class="fas fa-calculator text-xl text-indigo-400"></i>
+                    </div>
+                    <span class="bg-indigo-900/50 text-indigo-300 px-3 py-1 rounded-full text-xs">{{ subject_counts['Toán'] }} đề thi</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Toán Học</h3>
+                <p class="text-gray-400 text-sm mb-4">Các đề thi từ cơ bản đến nâng cao, phù hợp mọi trình độ</p>
+                <a href="{{ url_for('view_subject', subject='Toán') }}" class="btn-glow bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg inline-block transition-all duration-300">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Subject Card 2: Lí -->
+            <div class="subject-card bg-[#2a2a3f] rounded-xl p-6 shadow-lg border border-[#3a3a4f]">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-purple-900 flex items-center justify-center">
+                        <i class="fas fa-flask text-xl text-purple-400"></i>
+                    </div>
+                    <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-xs">{{ subject_counts['Lí'] }} đề thi</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Vật Lí</h3>
+                <p class="text-gray-400 text-sm mb-4">Đề thi thử và chính thức các năm, có đáp án chi tiết</p>
+                <a href="{{ url_for('view_subject', subject='Lí') }}" class="btn-glow bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg inline-block transition-all duration-300">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Subject Card 3: Hóa -->
+            <div class="subject-card bg-[#2a2a3f] rounded-xl p-6 shadow-lg border border-[#3a3a4f]">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-900 flex items-center justify-center">
+                        <i class="fas fa-atom text-xl text-blue-400"></i>
+                    </div>
+                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-xs">{{ subject_counts['Hóa'] }} đề thi</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Hóa Học</h3>
+                <p class="text-gray-400 text-sm mb-4">Tổng hợp đề thi từ các trường chuyên, lớp chọn</p>
+                <a href="{{ url_for('view_subject', subject='Hóa') }}" class="btn-glow bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-block transition-all duration-300">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Subject Card 4: Sinh Học -->
+            <div class="subject-card bg-[#2a2a3f] rounded-xl p-6 shadow-lg border border-[#3a3a4f]">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-green-900 flex items-center justify-center">
+                        <i class="fas fa-dna text-xl text-green-400"></i>
+                    </div>
+                    <span class="bg-green-900/50 text-green-300 px-3 py-1 rounded-full text-xs">{{ subject_counts['Sinh Học'] }} đề thi</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Sinh Học</h3>
+                <p class="text-gray-400 text-sm mb-4">Đề thi bám sát chương trình, cập nhật mới nhất</p>
+                <a href="{{ url_for('view_subject', subject='Sinh Học') }}" class="btn-glow bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-block transition-all duration-300">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Subject Card 5: Lịch Sử -->
+            <div class="subject-card bg-[#2a2a3f] rounded-xl p-6 shadow-lg border border-[#3a3a4f]">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-red-900 flex items-center justify-center">
+                        <i class="fas fa-globe-americas text-xl text-red-400"></i>
+                    </div>
+                    <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-xs">{{ subject_counts['Lịch Sử'] }} đề thi</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Lịch Sử</h3>
+                <p class="text-gray-400 text-sm mb-4">Đề thi theo chuyên đề, có hệ thống kiến thức</p>
+                <a href="{{ url_for('view_subject', subject='Lịch Sử') }}" class="btn-glow bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg inline-block transition-all duration-300">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Subject Card 6: Địa Lí -->
+            <div class="subject-card bg-[#2a2a3f] rounded-xl p-6 shadow-lg border border-[#3a3a4f]">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-teal-900 flex items-center justify-center">
+                        <i class="fas fa-map text-xl text-teal-400"></i>
+                    </div>
+                    <span class="bg-teal-900/50 text-teal-300 px-3 py-1 rounded-full text-xs">{{ subject_counts['Địa Lí'] }} đề thi</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Địa Lí</h3>
+                <p class="text-gray-400 text-sm mb-4">Đề thi thực hành bản đồ và kiến thức địa lý</p>
+                <a href="{{ url_for('view_subject', subject='Địa Lí') }}" class="btn-glow bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg inline-block transition-all duration-300">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Subject Card 7: GDKT-PL -->
+            <div class="subject-card bg-[#2a2a3f] rounded-xl p-6 shadow-lg border border-[#3a3a4f]">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-orange-900 flex items-center justify-center">
+                        <i class="fas fa-balance-scale text-xl text-orange-400"></i>
+                    </div>
+                    <span class="bg-orange-900/50 text-orange-300 px-3 py-1 rounded-full text-xs">{{ subject_counts['GDKT-PL'] }} đề thi</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">GDKT-PL</h3>
+                <p class="text-gray-400 text-sm mb-4">Đề thi giáo dục kinh tế và pháp luật thực tiễn</p>
+                <a href="{{ url_for('view_subject', subject='GDKT-PL') }}" class="btn-glow bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg inline-block transition-all duration-300">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Subject Card 8: Ngữ Văn -->
+            <div class="subject-card bg-[#2a2a3f] rounded-xl p-6 shadow-lg border border-[#3a3a4f]">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-yellow-900 flex items-center justify-center">
+                        <i class="fas fa-book text-xl text-yellow-400"></i>
+                    </div>
+                    <span class="bg-yellow-900/50 text-yellow-300 px-3 py-1 rounded-full text-xs">{{ subject_counts['Ngữ Văn'] }} đề thi</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Ngữ Văn</h3>
+                <p class="text-gray-400 text-sm mb-4">Đề thi phân tích tác phẩm, nghị luận xã hội</p>
+                <a href="{{ url_for('view_subject', subject='Ngữ Văn') }}" class="btn-glow bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg inline-block transition-all duration-300">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Subject Card 9: Tiếng Anh -->
+            <div class="subject-card bg-[#2a2a3f] rounded-xl p-6 shadow-lg border border-[#3a3a4f]">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-pink-900 flex items-center justify-center">
+                        <i class="fas fa-language text-xl text-pink-400"></i>
+                    </div>
+                    <span class="bg-pink-900/50 text-pink-300 px-3 py-1 rounded-full text-xs">{{ subject_counts['Tiếng Anh'] }} đề thi</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Tiếng Anh</h3>
+                <p class="text-gray-400 text-sm mb-4">Đề thi trắc nghiệm và tự luận, chuẩn quốc tế</p>
+                <a href="{{ url_for('view_subject', subject='Tiếng Anh') }}" class="btn-glow bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg inline-block transition-all duration-300">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Subject Card 10: Tin Học -->
+            <div class="subject-card bg-[#2a2a3f] rounded-xl p-6 shadow-lg border border-[#3a3a4f]">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-cyan-900 flex items-center justify-center">
+                        <i class="fas fa-laptop-code text-xl text-cyan-400"></i>
+                    </div>
+                    <span class="bg-cyan-900/50 text-cyan-300 px-3 py-1 rounded-full text-xs">{{ subject_counts['Tin Học'] }} đề thi</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Tin Học</h3>
+                <p class="text-gray-400 text-sm mb-4">Đề thi lập trình và ứng dụng tin học cơ bản</p>
+                <a href="{{ url_for('view_subject', subject='Tin Học') }}" class="btn-glow bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg inline-block transition-all duration-300">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- Subject Card 11: Công Nghệ -->
+            <div class="subject-card bg-[#2a2a3f] rounded-xl p-6 shadow-lg border border-[#3a3a4f]">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center">
+                        <i class="fas fa-cogs text-xl text-gray-400"></i>
+                    </div>
+                    <span class="bg-gray-900/50 text-gray-300 px-3 py-1 rounded-full text-xs">{{ subject_counts['Công Nghệ'] }} đề thi</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Công Nghệ</h3>
+                <p class="text-gray-400 text-sm mb-4">Đề thi về kỹ thuật và ứng dụng công nghệ</p>
+                <a href="{{ url_for('view_subject', subject='Công Nghệ') }}" class="btn-glow bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg inline-block transition-all duration-300">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <div class="subject-card bg-[#2a2a3f] rounded-xl p-6 shadow-lg border border-[#3a3a4f]">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-red-900 flex items-center justify-center">
+                        <i class="fas fa-globe-americas text-xl text-red-400"></i>
+                    </div>
+                    <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-xs">{{ subject_counts['Lịch Sử'] }} đề thi</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Đề Ôn ĐGNL</h3>
+                <p class="text-gray-400 text-sm mb-4">Đề thi về ĐGNL, chúc các bạn ôn tập tốt</p>
+                <a href="{{ url_for('view_subject', subject='DGNL') }}" class="btn-glow bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg inline-block transition-all duration-300">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add hover effect to subject cards
+    document.querySelectorAll('.subject-card').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-5px) scale(1.02)';
+            card.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.2)';
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
+            card.style.boxShadow = '';
+        });
+    });
+
+    // Add glow effect to buttons
+    document.querySelectorAll('.btn-glow').forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+            btn.style.boxShadow = '0 0 15px rgba(99, 102, 241, 0.7)';
+        });
+        
+        btn.addEventListener('mouseleave', () => {
+            btn.style.boxShadow = '';
+        });
+    });
+</script>
+{% endblock %}

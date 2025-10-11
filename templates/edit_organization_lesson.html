@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Chỉnh Sửa Bài | CodeJourney
+{% endblock %}
+
+{% block link %}
+<style>
+        .custom-textarea {
+            background-color: #2d2d42;
+            color: #e0e0e0;
+            border: 1px solid #3d3d5c;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            width: 100%;
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+        .custom-textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        }
+        .custom-input {
+            background-color: #2d2d42;
+            color: #e0e0e0;
+            border: 1px solid #3d3d5c;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            width: 100%;
+        }
+        .custom-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        }
+        .file-upload-label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #6366f1;
+            color: white;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .file-upload-label:hover {
+            background-color: #4f46e5;
+        }
+        .folder-upload-label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #8b5cf6;
+            color: white;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .folder-upload-label:hover {
+            background-color: #7c3aed;
+        }
+        .submit-btn {
+            background-color: #10b981;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .submit-btn:hover {
+            background-color: #059669;
+        }
+        .file-list-item {
+            background-color: #2d2d42;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .file-list-item input[type="checkbox"] {
+            margin-right: 0.75rem;
+        }
+    </style>
+{% endblock %}
+ 
+{% block content %}
+<div class=" mx-auto px-4 py-8 max-w-6xl">
+        <div class="flex items-center justify-between mb-6">
+                     <i class="fas fa-code text-indigo-500 text-3xl mr-3"></i>
+            <h1 class="text-2xl font-bold text-indigo-400">Chỉnh Sửa Bài Tập</h1>
+                    <a href="{{ url_for('organization_lessons', organization_id=lesson.organization_id) }}" class="flex items-center space-x-3">
+                        <div class="w-3 h-8 rounded-full bg-purple-500"></div>
+                        <div class="w-3 h-8 rounded-full bg-blue-500 opacity-70"></div>
+                        <div class="w-3 h-8 rounded-full bg-indigo-500 opacity-50"></div>
+                    </a>
+                </div>
+
+        <form method="POST" enctype="multipart/form-data" class="bg-[#252538] rounded-lg shadow-lg p-6">
+            <!-- Title Input -->
+            <div class="mb-6">
+                <label for="title" class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fas fa-heading mr-2 text-indigo-400"></i>Tiêu đề
+                </label>
+                <input type="text" id="title" name="title" value="{{ lesson.title }}" required
+                    class="custom-input">
+            </div>
+
+            <!-- Content Textarea -->
+            <div class="mb-6">
+                <label for="content" class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fas fa-align-left mr-2 text-indigo-400"></i>Nội dung
+                </label>
+                <textarea id="content" name="content" rows="6" required
+                    class="custom-textarea">{{ lesson.content }}</textarea>
+            </div>
+
+            <!-- Sample Input -->
+            <div class="mb-6">
+                <label for="input" class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fas fa-keyboard mr-2 text-indigo-400"></i>Input Mẫu
+                </label>
+                <textarea id="input" name="input" rows="3" placeholder="Nhập input (nếu có)"
+                    class="custom-textarea">{{ lesson.input_data }}</textarea>
+            </div>
+
+            <!-- Sample Output -->
+            <div class="mb-6">
+                <label for="output" class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fas fa-terminal mr-2 text-indigo-400"></i>Output Mẫu
+                </label>
+                <textarea id="output" name="output" rows="3" placeholder="Nhập output tương ứng"
+                    class="custom-textarea">{{ lesson.output_data }}</textarea>
+            </div>
+
+            <!-- File Upload -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fas fa-paperclip mr-2 text-indigo-400"></i>Chọn file đính kèm
+                </label>
+                <div class="flex items-center">
+                    <label for="files" class="file-upload-label">
+                        <i class="fas fa-upload mr-2"></i>Chọn File
+                    </label>
+                    <input type="file" name="files" multiple id="files" class="hidden">
+                    <span id="file-count" class="ml-3 text-sm text-gray-400">Chưa có file nào được chọn</span>
+                </div>
+            </div>
+
+            <!-- Folder Upload -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fas fa-folder mr-2 text-indigo-400"></i>Upload Folder Test Case Mới
+                </label>
+                <div class="flex items-center">
+                    <label for="testcase_folder" class="folder-upload-label">
+                        <i class="fas fa-folder-open mr-2"></i>Chọn Thư Mục
+                    </label>
+                    <input type="file" id="testcase_folder" name="testcase_folder" webkitdirectory directory multiple class="hidden">
+                    <span id="folder-name" class="ml-3 text-sm text-gray-400">Chưa chọn thư mục</span>
+                </div>
+            </div>
+
+            <!-- Existing Files -->
+            <div class="mb-8">
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                    <i class="fas fa-trash-alt mr-2 text-indigo-400"></i>Xóa file đã tải lên
+                </label>
+                <div class="bg-[#2d2d42] rounded-lg p-4">
+                    {% if lesson.file_paths %}
+                        <ul class="space-y-2">
+                            {% for file in lesson.file_paths %}
+                                <li class="file-list-item">
+                                    <input type="checkbox" name="remove_files" value="{{ file }}" id="file-{{ loop.index }}" class="rounded text-indigo-500">
+                                    <label for="file-{{ loop.index }}" class="text-gray-300">{{ file }}</label>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-gray-400 italic">Không có file nào đã tải lên</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end">
+                <button type="submit" class="submit-btn flex items-center">
+                    <i class="fas fa-save mr-2"></i>Cập nhật bài học
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // File upload display
+        document.getElementById('files').addEventListener('change', function(e) {
+            const fileCount = document.getElementById('file-count');
+            if (this.files.length > 0) {
+                fileCount.textContent = `${this.files.length} file(s) đã được chọn`;
+            } else {
+                fileCount.textContent = "Chưa có file nào được chọn";
+            }
+        });
+
+        // Folder upload display
+        document.getElementById('testcase_folder').addEventListener('change', function(e) {
+            const folderName = document.getElementById('folder-name');
+            if (this.files.length > 0) {
+                folderName.textContent = `${this.files.length} tệp đã được chọn`;
+            } else {
+                folderName.textContent = "Chưa chọn thư mục";
+            }
+        });
+
+        // Add syntax highlighting to textareas (simplified example)
+        document.querySelectorAll('textarea').forEach(textarea => {
+            textarea.addEventListener('focus', function() {
+                this.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.3)';
+            });
+            
+            textarea.addEventListener('blur', function() {
+                this.style.boxShadow = 'none';
+            });
+        });
+    </script>
+{% endblock %}
